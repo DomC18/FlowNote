@@ -1,0 +1,18 @@
+--------------
+have a calendar option on the front screen
+on open project: display main info in one-bar layout
+    organize by name, deadline, etc.
+color theme customizer
+extra color themes for minigames (star popping)
+--------------
+
+(
+    finished project submission screen
+    need to finish project interfaces and logic
+)
+
+[
+    to expand to further subs there will be three dots initially
+    when a user presses on it the ui will change so the first sub is the biggest like the project screen
+    there will be an arrow to go back to the top at the top of the screen and further three dots to expand down
+]

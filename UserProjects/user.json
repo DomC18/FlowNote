@@ -1,0 +1,14 @@
+{
+    "user": {
+        "username": "user",
+        "password": "user"
+    },
+    "projects": {
+        "testproj": {
+            
+        },
+        "chemistry": {
+            
+        }
+    }       
+}

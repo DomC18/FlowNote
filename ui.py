@@ -1,18 +1,12 @@
-from tkinter import font
-from tkinter.font import BOLD
-from tkinter import messagebox
 from PIL import ImageTk, ImageFilter, Image
 from datetime import datetime, date
-import pygame
+from tkinter import messagebox
+import globalvariables as gv
+import pygame as pyg
 import tkinter as tk
-import random as r
-import os
-
-def char_limit(text):
-    if len(text) <= 30:
-        return True
-    else:
-        return False
+import random as rr
+import constants
+import ds
 
 def get_south_y(y_size_pixels:int, north_y:float):
     return (y_size_pixels/1080)+north_y
@@ -27,229 +21,63 @@ def calc_dist23(south_y):
     return south_y+((2*(0.95-south_y))/3)
 
 def determine_month(month):
-    months = {"January":1, "February":2, "March":3, "April":4, "May":5, "June":6, "July":7, "August":8, "September":9, "October":10, "November":11, "December":12}
+    months = {"January":"01", "February":"02", "March":"03", "April":"04", "May":"05", "June":"06", "July":"07", "August":"08", "September":"09", "October":"10", "November":"11", "December":"12"}
     return months[month]
 
 def determine_day(day):
-    days = {'1st':1, '2nd':2, '3rd':3, '4th':4, '5th':5, '6th':6, '7th':7, '8th':8, '9th':9, '10th':10, '11th':11, '12th':12, '13th':13, '14th':14, '15th':15, '16th':16, '17th':17, '18th':18, '19th':19, '20th':20, '21st':21, '22nd':22, '23rd':23, '24th':24, '25th':25, '26th':26, '27th':27, '28th':28, '29th':29, '30th':30, '31st':31}
+    days = {'1st':"01", '2nd':"02", '3rd':"03", '4th':"04", '5th':"05", '6th':"06", '7th':"07", '8th':"08", '9th':"09", '10th':"10", '11th':"11", '12th':"12", '13th':"13", '14th':"14", '15th':"15", '16th':"16", '17th':"17", '18th':"18", '19th':"19", '20th':"20", '21st':"21", '22nd':"22", '23rd':"23", '24th':"24", '25th':"25", '26th':"26", '27th':"27", '28th':"28", '29th':"29", '30th':"30", '31st':"31"}
     return days[day]
 
+def char_limit(text):
+    if len(text) <= 30:
+        return True
+    else:
+        return False
+
 def play_sound(filedir:str):
-    pygame.mixer.init()
-    pygame.mixer.music.load(filedir)
-    pygame.mixer.music.play()
+    pyg.mixer.init()
+    pyg.mixer.music.load(filedir)
+    pyg.mixer.music.play()
 
 def play_click():
-    play_sound(SOUNDS_PATH + r"\click.wav")
+    play_sound(constants.CLICK_SOUND)
 
-FILE_PATH = os.path.abspath(__file__)
-USER_PROJECTS_PATH = FILE_PATH[:-11] + r"UserProjects"
-UI_PATH = FILE_PATH[:-11] + r"UI"
-SOUNDS_PATH = FILE_PATH[:-11] + r"Sounds"
-"""file_name = 'new_file.txt'
-file_path = os.path.join(USER_PROJECTS_PATH, file_name)
-file = open(file_path, 'w')
-file.write("hi")
-file.close()"""
+def play_back():
+    play_sound(constants.BACK_SOUND)
 
-window = tk.Tk()
-window.title("FlowNote")
-window.geometry("600x600")
-window.resizable(width=False, height=False)
-window.configure(bg="#414449")
-window.bind("<Escape>", quit)
-char_limit_cmd = window.register(char_limit)
+def play_pop():
+    play_sound(constants.POP_SOUND)
 
-class Sub:
-    def __init__(self, parent, name:str, description="", time_sensitive=False, date_to_complete=date(2023, 7, 8), notes=""):
-        self.parent = parent
-        self.name = name
-        self.description = description
-        self.time_sensitive = time_sensitive
-        self.date_to_complete = date_to_complete if self.time_sensitive else None
-        self.notes = notes
-        self.sub_button = tk.Button()
-        self.entry = tk.Entry()
-        self.subs = []
+gv.window = tk.Tk()
+gv.window.title("FlowNote")
+gv.window.geometry("600x600")
+gv.window.resizable(width=False, height=False)
+gv.window.configure(bg="#414449")
+gv.window.bind("<Escape>", quit)
+char_limit_cmd = gv.window.register(char_limit)
 
-    def add_sub(self, name):
-        new_sub = Sub(name)
-        self.subs.append(new_sub)
-        return new_sub
-    
-    def edit_name(self, new_name):
-        self.name = new_name
-    
-    def edit_description(self, new_description):
-        self.description = new_description
-    
-    def edit_time_sensitivity(self, new_timesensitivity):
-        self.time_sensitive = new_timesensitivity
-    
-    def edit_deadline(self, new_deadline):
-        self.date_to_complete = new_deadline
-    
-    def edit_notes(self, new_notes):
-        self.notes = new_notes
-    
-    def edit_all(self, name, description, time_sensitivity, deadline, notes):
-        self.edit_name(name)
-        self.edit_description(description)
-        self.edit_time_sensitivity(time_sensitivity)
-        self.edit_deadline(deadline)
-        self.edit_notes(notes)
-
-    def place_entry(self, relx, rely):
-        self.entry.place(relx=relx, rely=rely)
-
-    def place_button(self, relx, rely):
-        self.sub_button.configure(command=self.add_sub())
-        self.sub_button.place(relx=relx, rely=rely)
-
-    def validate_date(self, date_to_complete) -> bool:
-        if (date_to_complete - datetime.now().date()).days <= 0:
-            return False
-        else:
-            if (self.parent.date_to_complete - date_to_complete).days <= 0:
-                return False
-            else:
-                return True
-
-    def calculate_days_left(self) -> float:
-        return (self.date_to_complete - datetime.now().date()).days
-
-    def __repr__(self) -> str:
-        return f'[Parent:"{self.parent.name}", Name:"{self.name}", Description:"{self.description}", TimeSensitive:"{self.time_sensitive}", DateToComplete:"{self.date_to_complete}", Notes:"{self.notes}", Children:{self.subs}]'
-
-class Main:
-    def __init__(self, parent, name:str, description="", time_sensitive=False, date_to_complete=date(2023, 7, 8), notes=""):
-        self.parent = parent
-        self.name = name
-        self.description = description
-        self.time_sensitive = time_sensitive
-        self.date_to_complete = date_to_complete if self.time_sensitive else None
-        self.notes = notes
-        self.subs = []
-
-    def set_coords(self, relx, rely):
-        self.relx = relx
-        self.rely = rely
-
-    def add_sub(self, sub, name) -> Sub:
-        new_sub = Sub(sub, name)
-        self.subs.append(new_sub)
-        return new_sub
-    
-    def edit_name(self, new_name):
-        self.name = new_name
-    
-    def edit_description(self, new_description):
-        self.description = new_description
-    
-    def edit_time_sensitivity(self, new_timesensitivity):
-        self.time_sensitive = new_timesensitivity
-    
-    def edit_deadline(self, new_deadline):
-        self.date_to_complete = new_deadline
-    
-    def edit_notes(self, new_notes):
-        self.notes = new_notes
-    
-    def edit_all(self, name, description, time_sensitivity, deadline, notes):
-        self.edit_name(name)
-        self.edit_description(description)
-        self.edit_time_sensitivity(time_sensitivity)
-        self.edit_deadline(deadline)
-        self.edit_notes(notes)
-
-    def validate_date(self, date_to_complete) -> bool:
-        if (date_to_complete - datetime.now().date()).days <= 0:
-            return False
-        else:
-            if (self.parent.date_to_complete - date_to_complete).days <= 0:
-                return False
-            else:
-                return True
-
-    def calculate_days_left(self) -> float:
-        return (self.date_to_complete - datetime.now().date()).days
-
-    def __repr__(self) -> str:
-        return f'[Name:"{self.name}", Description:"{self.description}", TimeSensitive:"{self.time_sensitive}", DateToComplete:"{self.date_to_complete}", Notes:"{self.notes}", Children:{self.subs}]'
-
-class Project:
-    def __init__(self, name:str, description="", time_sensitive=False, date_to_complete=date(2023, 7, 8), notes=""):
-        self.name = name
-        self.description = description
-        self.date_to_complete = date_to_complete if time_sensitive else None
-        self.time_sensitive = time_sensitive
-        self.notes = notes
-        self.mains = []
-
-    def add_main(self, parent, name) -> Main:
-        new_main = Main(parent, name=name)
-        self.mains.append(new_main)
-        return new_main
-
-    def edit_name(self, new_name):
-        self.name = new_name
-
-    def edit_description(self, new_description):
-        self.description = new_description
-
-    def edit_time_sensitivity(self, new_timesensitivity):
-        self.time_sensitive = new_timesensitivity
-
-    def edit_deadline(self, new_deadline):
-        self.date_to_complete = new_deadline
-
-    def edit_notes(self, new_notes):
-        self.notes = new_notes
-    
-    def edit_all(self, name, description, time_sensitivity, deadline, notes):
-        self.edit_name(name)
-        self.edit_description(description)
-        self.edit_time_sensitivity(time_sensitivity)
-        self.edit_deadline(deadline)
-        self.edit_notes(notes)
-
-    def date_after_current(date_to_complete) -> bool:
-        if (date_to_complete - datetime.now().date()).days <= 0:
-            return False
-        else:
-            return True
-
-    def calculate_days_left(self) -> float:
-        return (self.date_to_complete - datetime.now().date()).days
-
-    def __repr__(self) -> str:
-        return f'[Name:"{self.name}", Description:"{self.description}", TimeSensitive:"{self.time_sensitive}", DateToComplete:"{self.date_to_complete}", Notes:"{self.notes}", Children:{self.mains}]'
-
-
-
-
-logo = Image.open(UI_PATH + r"\logounsigned.jpg")
+logo = Image.open(constants.LOGO_UNSIGNED_ICON)
 logo = logo.resize((600, 600), Image.Resampling.LANCZOS)
 logo_photo = ImageTk.PhotoImage(logo)
-logo_label = tk.Label(window, image=logo_photo)
+logo_label = tk.Label(gv.window, image=logo_photo)
 logo_label.image = logo_photo
 logo_label.pack()
 
-transparent_image = Image.open(UI_PATH + r"\actuallytransparent.png")
+transparent_image = Image.open(constants.ACTUALLY_TRANSPARENT_ICON)
 transparent_photo = ImageTk.PhotoImage(transparent_image)
 blur_func_calls = 0
 stars = []
 star_loop = [None]
-sky = Image.open(UI_PATH + r"\sky.jpg")
+sky = Image.open(constants.SKY_ICON)
 sky = sky.resize((1920, 1080), Image.Resampling.LANCZOS)
 sky_photo = ImageTk.PhotoImage(sky)
-sky_mini = Image.open(UI_PATH + r"\sky.jpg")
+sky_mini = Image.open(constants.SKY_ICON)
 sky_mini_photo = ImageTk.PhotoImage(sky_mini)
-sky_label = tk.Label(window, image=sky_photo)
+sky_label = tk.Label(gv.window, image=sky_photo)
 sky_label.image = sky_photo
 back = tk.Button()
-undo = tk.Button(text="↩", font=("Helvetica", 20, BOLD), bg="black", fg="white", relief="raised")
-new_project:Project
+undo = tk.Button(text="↩", font=("Helvetica", 20, "bold"), bg="black", fg="white", relief="raised")
+new_project:ds.Project
 new_project_menu_items = []
 main_ct = [0]
 main_canvas_size = [0]
@@ -263,10 +91,10 @@ def proj_bg_pos_generator():
     screen_range = range(1, 1001)
     current_poss = []
     all_poss = []
-    for _ in range(1, 43):
-        curr_pos = r.choice(screen_range) / 1000
+    for _ in range(1, 21):
+        curr_pos = rr.choice(screen_range) / 1000
         while curr_pos in current_poss:
-            curr_pos = r.choice(screen_range) / 1000
+            curr_pos = rr.choice(screen_range) / 1000
         current_poss.append(curr_pos)
         if len(current_poss) == 6:
             current_poss.pop(0)
@@ -277,21 +105,21 @@ def proj_bg_hor():
     global stars
     global star_loop
     stars = []
-    logo = Image.open(UI_PATH + r"\logowithsky.jpg")
+    logo = Image.open(constants.LOGO_WITH_SKY_ICON)
     x_increase = 1/42
     y_positions = proj_bg_pos_generator()
     speed_range = range(10,601)
     degrees_range = range(1,21)
     idx = 1
     for y in y_positions:
-        resizing = r.choice(range(10, 41))
+        resizing = rr.choice(range(10, 41))
         logo = logo.resize((resizing, resizing), Image.Resampling.LANCZOS)
         logo_photo = ImageTk.PhotoImage(logo)
-        logo_label = tk.Button(window, image=logo_photo, relief="flat", bd=0, highlightthickness=0)
+        logo_label = tk.Button(gv.window, image=logo_photo, relief="flat", bd=0, highlightthickness=0)
         logo_label.image = logo_photo
         logo_label.place(relx=x_increase*idx, rely=y)
         idx += 1
-        stars.append((logo_label, x_increase*idx, y, r.choice(speed_range) / 10000, r.choice(degrees_range)))
+        stars.append((logo_label, x_increase*idx, y, rr.choice(speed_range) / 10000, rr.choice(degrees_range)))
     
     def loop_l():
         for idx, star_comb in enumerate(stars):
@@ -299,12 +127,12 @@ def proj_bg_hor():
             star_comb[0].place_forget()
             if star_comb[1] - star_comb[3] <= 0:
                 star_comb[1] = 1
-                star_comb[3] = r.choice(speed_range) / 10000
+                star_comb[3] = rr.choice(speed_range) / 10000
             else:
                 star_comb[1] = star_comb[1] - star_comb[3]
             star_comb[0].place(relx=star_comb[1], rely=star_comb[2])
             stars[idx] = tuple(star_comb)
-        this_loop = window.after(50, loop_l)
+        this_loop = gv.window.after(50, loop_l)
         star_loop[0] = this_loop
         return this_loop
 
@@ -314,12 +142,12 @@ def proj_bg_hor():
             star_comb[0].place_forget()
             if star_comb[1] - star_comb[3] >= 1:
                 star_comb[1] = 0
-                star_comb[3] = r.choice(speed_range) / 10000
+                star_comb[3] = rr.choice(speed_range) / 10000
             else:
                 star_comb[1] = star_comb[1] + star_comb[3]
             star_comb[0].place(relx=star_comb[1], rely=star_comb[2])
             stars[idx] = tuple(star_comb)
-        this_loop = window.after(50, loop_r)
+        this_loop = gv.window.after(50, loop_r)
         star_loop[0] = this_loop
         return this_loop
     
@@ -330,7 +158,7 @@ def proj_bg_hor():
         star_loop[0] = loop_r()
     
     choices = [0, 1]
-    choice = r.choice(choices)
+    choice = rr.choice(choices)
     if choice == 0 :
         start_lstar_loop()
     else:
@@ -340,21 +168,21 @@ def proj_bg_vert():
     global stars
     global star_loop
     stars = []
-    logo = Image.open(UI_PATH + r"\logowithsky.jpg")
+    logo = Image.open(constants.LOGO_WITH_SKY_ICON)
     x_positions = proj_bg_pos_generator()
     y_increase = 1/42
     speed_range = range(10,601,1)
     degrees_range = range(1,21)
     idx = 1
     for x in x_positions:
-        resizing = r.choice(range(10, 41))
+        resizing = rr.choice(range(10, 41))
         logo = logo.resize((resizing, resizing), Image.Resampling.LANCZOS)
         logo_photo = ImageTk.PhotoImage(logo)
-        logo_label = tk.Button(window, image=logo_photo, relief="flat", bd=0, highlightthickness=0)
+        logo_label = tk.Button(gv.window, image=logo_photo, relief="flat", bd=0, highlightthickness=0)
         logo_label.image = logo_photo
         logo_label.place(relx=x, rely=y_increase*idx)
         idx += 1
-        stars.append((logo_label, x, y_increase*idx, r.choice(speed_range) / 10000, r.choice(degrees_range)))
+        stars.append((logo_label, x, y_increase*idx, rr.choice(speed_range) / 10000, rr.choice(degrees_range)))
     
     def loop_n():
         for idx, star_comb in enumerate(stars):
@@ -362,12 +190,12 @@ def proj_bg_vert():
             star_comb[0].place_forget()
             if star_comb[2] - star_comb[3] <= 0:
                 star_comb[2] = 1
-                star_comb[3] = r.choice(speed_range) / 10000
+                star_comb[3] = rr.choice(speed_range) / 10000
             else:
                 star_comb[2] = star_comb[2] - star_comb[3]
             star_comb[0].place(relx=star_comb[1], rely=star_comb[2])
             stars[idx] = tuple(star_comb)
-        this_loop = window.after(50, loop_n)
+        this_loop = gv.window.after(50, loop_n)
         star_loop[0] = this_loop
         return this_loop
     
@@ -377,12 +205,12 @@ def proj_bg_vert():
             star_comb[0].place_forget()
             if star_comb[2] - star_comb[3] >= 1:
                 star_comb[2] = 0
-                star_comb[3] = r.choice(speed_range) / 10000
+                star_comb[3] = rr.choice(speed_range) / 10000
             else:
                 star_comb[2] = star_comb[2] + star_comb[3]
             star_comb[0].place(relx=star_comb[1], rely=star_comb[2])
             stars[idx] = tuple(star_comb)
-        this_loop = window.after(50, loop_s)
+        this_loop = gv.window.after(50, loop_s)
         star_loop[0] = this_loop
         return this_loop
     
@@ -393,7 +221,7 @@ def proj_bg_vert():
         star_loop[0] = loop_s()
     
     choices = [0, 1]
-    choice = r.choice(choices)
+    choice = rr.choice(choices)
     if choice == 0 :
         start_nstar_loop()
     else:
@@ -415,7 +243,7 @@ def forward_blur_animation(radius):
     logo_label.configure(image=logo_photo)
     logo_label.image = logo_photo
     if radius < 6:
-        window.after(75, forward_blur_animation, radius + 1)
+        gv.window.after(75, forward_blur_animation, radius + 1)
 
 def backward_blur_animation(radius, back, new_project, old_project):
     global blur_func_calls
@@ -431,7 +259,7 @@ def backward_blur_animation(radius, back, new_project, old_project):
     logo_label.image = logo_photo
     blur_func_calls += 1
     if radius > 0:
-        window.after(75, backward_blur_animation, radius - 1, back, new_project, old_project)
+        gv.window.after(75, backward_blur_animation, radius - 1, back, new_project, old_project)
     else:
         cntue2.place(relx=0.45, rely=0.3825)
         cntue3.place(relx=0.5075, rely=0.3775)
@@ -451,7 +279,7 @@ def new_or_old_project_screen():
     play_click()
     global star_loop
     settings.place_forget()
-    try: window.after_cancel(star_loop[0])
+    try: gv.window.after_cancel(star_loop[0])
     except: pass
     for star_comb in stars:
         star_comb[0].place_forget()
@@ -461,11 +289,11 @@ def new_or_old_project_screen():
         except: pass
     sky_label.pack_forget()
     new_project_menu_items = []
-    window.attributes("-fullscreen", False)
-    window.geometry("600x600")
-    window.configure(bg="#414449")
+    gv.window.attributes("-fullscreen", False)
+    gv.window.geometry("600x600")
+    gv.window.configure(bg="#414449")
     forward_blur_animation(1)
-    back.configure(bg="#414449", fg="white", text="← Main Menu", font=("Helvetica", 16, BOLD), relief="flat")
+    back.configure(bg="#414449", fg="white", text="← Main Menu", font=("Helvetica", 16, "bold"), relief="flat")
     def button_press(event):
         back.config(relief=tk.RAISED)
     back.configure(command=lambda b=back, n=new_project_button, o=old_project_button : backward_blur_animation(6, b, n, o))
@@ -481,24 +309,24 @@ def new_project_screen(back):
     play_click()
     sky_label.pack()
     choices = [0, 1]
-    choice = r.choice(choices)
+    choice = rr.choice(choices)
     if choice == 0:
         proj_bg_hor()
     else:
         proj_bg_vert()
     time_sensitive = [True]
-    current_date = datetime.now().date()
     user_month = tk.StringVar()
     user_month.set("")
     user_day = tk.StringVar()
     user_day.set("")
     user_year = tk.StringVar()
     user_year.set("")
-    date_to_complete_label = tk.Label(font=("Helvetica", 18, BOLD), text="Date To Complete*", fg="white", bg="black")
+    date_to_complete_label = tk.Label(font=("Helvetica", 18, "bold"), text="Date To Complete*", fg="white", bg="black")
     new_project_menu_items.append(date_to_complete_label)
-    project_month = tk.OptionMenu(window, user_month, "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
-    project_day = tk.OptionMenu(window, user_day, '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th', '13th', '14th', '15th', '16th', '17th', '18th', '19th', '20th', '21st', '22nd', '23rd', '24th', '25th', '26th', '27th', '28th', '29th', '30th', '31st')
-    project_year = tk.OptionMenu(window, user_year, '2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030', '2031', '2032', '2033')
+    years = [str(datetime.today().year+i) for i in range(11)]
+    project_month = tk.OptionMenu(gv.window, user_month, "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+    project_day = tk.OptionMenu(gv.window, user_day, '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th', '13th', '14th', '15th', '16th', '17th', '18th', '19th', '20th', '21st', '22nd', '23rd', '24th', '25th', '26th', '27th', '28th', '29th', '30th', '31st')
+    project_year = tk.OptionMenu(gv.window, user_year, *years)
     project_month.configure(font=("Helvetica", 18), bd=0, highlightthickness=0)
     project_day.configure(font=("Helvetica", 18), bd=0, highlightthickness=0)
     project_year.configure(font=("Helvetica", 18), bd=0, highlightthickness=0)
@@ -527,20 +355,20 @@ def new_project_screen(back):
     logo_label.pack_forget()
     new_project_button.place_forget()
     old_project_button.place_forget()
-    window.attributes("-fullscreen", True)
-    name_label = tk.Label(font=("Helvetica", 18, BOLD), text="Project Name*", fg="white", bg="black")
+    gv.window.attributes("-fullscreen", True)
+    name_label = tk.Label(font=("Helvetica", 18, "bold"), text="Project Name*", fg="white", bg="black")
     name_label.place(anchor="s", relx=0.5, rely=(1/7)-0.03)
-    project_name = tk.Entry(window, validate="key", validatecommand=(char_limit_cmd, "%P"), font=("Helvetica", 18))
+    project_name = tk.Entry(gv.window, validate="key", validatecommand=(char_limit_cmd, "%P"), font=("Helvetica", 18))
     project_name.place(relx=0.5, rely=1/7, anchor="center")
     new_project_menu_items.append(name_label)
     new_project_menu_items.append(project_name)
-    description_label = tk.Label(font=("Helvetica", 18, BOLD), text="Project Description", fg="white", bg="black")
+    description_label = tk.Label(font=("Helvetica", 18, "bold"), text="Project Description", fg="white", bg="black")
     description_label.place(anchor="s", relx=0.5, rely=(2/7)-0.03)
     project_description = tk.Entry(font=("Helvetica", 18))
     project_description.place(relx=0.5, rely=2/7, anchor="center")
     new_project_menu_items.append(project_description)
     new_project_menu_items.append(description_label)
-    time_sensitive_label = tk.Label(font=("Helvetica", 18, BOLD), text="Time Sensitive?*", fg="white", bg="black")
+    time_sensitive_label = tk.Label(font=("Helvetica", 18, "bold"), text="Time Sensitive?*", fg="white", bg="black")
     time_sensitive_label.place(anchor="s", relx=0.5, rely=(3/7)-0.03)
     project_time_sensitive_y.configure(bg="green", text="YES", font=("Helvetica", 18))
     project_time_sensitive_y.configure(command=lambda a=project_time_sensitive_y, b=project_time_sensitive_n : time_sensitive_true(a,b))
@@ -557,18 +385,18 @@ def new_project_screen(back):
     new_project_menu_items.append(project_day)
     project_year.place(relx=0.5+0.035, rely=4/7, anchor="w")
     new_project_menu_items.append(project_year)
-    notes_label = tk.Label(font=("Helvetica", 18, BOLD), text="Notes", fg="white", bg="black")
+    notes_label = tk.Label(font=("Helvetica", 18, "bold"), text="Notes", fg="white", bg="black")
     notes_label.place(anchor="s", relx=0.5, rely=(5/7)-0.03)
     project_notes = tk.Entry(font=("Helvetica", 18))
     project_notes.place(relx=0.5, rely=5/7, anchor="center")
     new_project_menu_items.append(notes_label)
     new_project_menu_items.append(project_notes)
-    project_submit = tk.Button(font=("Helvetica", 25, BOLD), text="Submit", bg="green", bd=0, highlightthickness=0)
+    project_submit = tk.Button(font=("Helvetica", 25, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
     project_submit.configure(command=lambda na=project_name, dsc=project_description, ts=time_sensitive, yr=user_year, mo=user_month, day=user_day, rq=project_notes : new_project_submit(na, dsc, ts, yr, mo, day, rq))
     project_submit.place(relx=0.5, rely=6/7, anchor="center")
     new_project_menu_items.append(project_submit)
     time_sensitive_true(project_time_sensitive_y, project_time_sensitive_n)
-    back.configure(command=new_or_old_project_screen, text="← Main Menu", font=("Helvetica", 20, BOLD), bg="black", fg="white", relief="raised")
+    back.configure(command=new_or_old_project_screen, text="← Main Menu", font=("Helvetica", 20, "bold"), bg="black", fg="white", relief="raised")
     back.place(relx=0.002*9, rely=0.002*16, anchor="nw")
     back.tkraise()
 
@@ -587,72 +415,72 @@ def new_project_submit(name, description, time_sensitive, date_year, date_month,
             messagebox.showerror("No Project Date", "Please enter a project date.")
         else:
             pass
+
+    new_date = date_mo + "/" + date_dy + "/" + date_year.get()
     
     if time_sensitive[0] == True:
-        if not Project.date_after_current(date(int(date_year.get()), int(date_mo), int(date_dy))):
+        if not ds.Project.date_after_current(date(int(date_year.get()), int(date_mo), int(date_dy))):
             messagebox.showerror("Invalid Date", "Date entered is before or equal to the date today.")
             return
     
     try:
-        new_project = Project(name.get(), description.get(), time_sensitive[0], date(int(date_year.get()), int(date_mo), int(date_dy)), notes.get())
+        new_project = ds.Project(name.get(), description.get(), time_sensitive[0], new_date, notes.get())
     except ValueError:
-        new_project = Project(name.get(), description.get(), False, None, notes.get())
+        new_project = ds.Project(name.get(), description.get(), False, None, notes.get())
 
     for widget in new_project_menu_items:
         widget.place_forget()
     
-    canvas = tk.Canvas(window, width=665, height=315, bd=0, highlightthickness=0, bg="black")
+    canvas = tk.Canvas(gv.window, width=665, height=315, bd=0, highlightthickness=0, bg="black")
     canvas.place(anchor="n", relx=0.5, rely=0)
     canvas.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
     canvas.create_oval(7.5, 7.5, 650, 300, fill="#abcaf6", outline="white", width=3)
     Lproject_name = tk.Label(text=new_project.name, bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
     if len(new_project.name) <= 17:
-        Lproject_name.configure(font=("Helvetica", 50, BOLD))
+        Lproject_name.configure(font=("Helvetica", 50, "bold"))
         Lproject_name.place(anchor="n", relx=0.5, rely=0.1175)
     elif len(new_project.name) <= 30:
-        Lproject_name.configure(font=("Helvetica", 32, BOLD))
+        Lproject_name.configure(font=("Helvetica", 32, "bold"))
         Lproject_name.place(anchor="n", relx=0.5, rely=0.13125)
     
-    Lproject_desc = tk.Label(text=new_project.description, font=("Helvetica", 14, BOLD), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
+    Lproject_desc = tk.Label(text=new_project.description, font=("Helvetica", 14, "bold"), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
     Lproject_desc.place(anchor="n", relx=0.5, rely=0.225)
-    Lproject_days_left = tk.Label(font=("Helvetica", 22, BOLD), bg="#abcaf6", fg="red", bd=0, highlightthickness=0)
-    try:
-        Lproject_days_left.configure(text=f"{new_project.calculate_days_left()} DAYS LEFT") 
-        Lproject_days_left.place(anchor="n", relx=0.5, rely=0.06875)
-    except: pass
+    Lproject_days_left = tk.Label(font=("Helvetica", 22, "bold"), bg="#abcaf6", fg="red", bd=0, highlightthickness=0)
+    Lproject_days_left.configure(text=f"{new_project.calculate_days_left()} DAYS LEFT") 
+    Lproject_days_left.place(anchor="n", relx=0.5, rely=0.06875)
 
-    Lproject_notes = tk.Label(text=new_project.notes, font=("Helvetica", 14, BOLD), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
+    Lproject_notes = tk.Label(text=new_project.notes, font=("Helvetica", 14, "bold"), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
     new_project_menu_items.append(canvas)
     new_project_menu_items.append(Lproject_name)
     new_project_menu_items.append(Lproject_desc)
     new_project_menu_items.append(Lproject_days_left)
     new_project_menu_items.append(Lproject_notes)
 
-    canvas1 = tk.Canvas(window, bd=0, highlightthickness=0, bg="black")
-    name_label1 = tk.Label(font=("Helvetica", 18, BOLD), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
+    canvas1 = tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black")
+    name_label1 = tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
     main_name1 = tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center")
-    main_create1 = tk.Button(font=("Helvetica", 16, BOLD), text="Submit", bg="green", bd=0, highlightthickness=0)
-    canvas2 = tk.Canvas(window, bd=0, highlightthickness=0, bg="black")
-    name_label2 = tk.Label(font=("Helvetica", 18, BOLD), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
+    main_create1 = tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
+    canvas2 = tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black")
+    name_label2 = tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
     main_name2 = tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center")
-    main_create2 = tk.Button(font=("Helvetica", 16, BOLD), text="Submit", bg="green", bd=0, highlightthickness=0)
-    canvas3 = tk.Canvas(window, bd=0, highlightthickness=0, bg="black")
-    name_label3 = tk.Label(font=("Helvetica", 18, BOLD), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
+    main_create2 = tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
+    canvas3 = tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black")
+    name_label3 = tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
     main_name3 = tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center")
-    main_create3 = tk.Button(font=("Helvetica", 16, BOLD), text="Submit", bg="green", bd=0, highlightthickness=0)
-    canvas4 = tk.Canvas(window, bd=0, highlightthickness=0, bg="black")
-    name_label4 = tk.Label(font=("Helvetica", 18, BOLD), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
+    main_create3 = tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
+    canvas4 = tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black")
+    name_label4 = tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
     main_name4 = tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center")
-    main_create4 = tk.Button(font=("Helvetica", 16, BOLD), text="Submit", bg="green", bd=0, highlightthickness=0)
-    canvas5 = tk.Canvas(window, bd=0, highlightthickness=0, bg="black")
-    name_label5 = tk.Label(font=("Helvetica", 18, BOLD), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
+    main_create4 = tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
+    canvas5 = tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black")
+    name_label5 = tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
     main_name5 = tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center")
-    main_create5 = tk.Button(font=("Helvetica", 16, BOLD), text="Submit", bg="green", bd=0, highlightthickness=0)
-    one = tk.Button(text="1", font=("Helvetica", 20, BOLD), bd=0, highlightthickness=0, bg="green", fg="black")
-    two = tk.Button(text="2", font=("Helvetica", 20, BOLD), bd=0, highlightthickness=0, bg="green", fg="black")
-    three = tk.Button(text="3", font=("Helvetica", 20, BOLD), bd=0, highlightthickness=0, bg="green", fg="black")
-    four = tk.Button(text="4", font=("Helvetica", 20, BOLD), bd=0, highlightthickness=0, bg="green", fg="black")
-    five = tk.Button(text="5", font=("Helvetica", 20, BOLD), bd=0, highlightthickness=0, bg="green", fg="black")
+    main_create5 = tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
+    one = tk.Button(text="1", font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black")
+    two = tk.Button(text="2", font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black")
+    three = tk.Button(text="3", font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black")
+    four = tk.Button(text="4", font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black")
+    five = tk.Button(text="5", font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black")
     new_project_menu_items.append(one)
     new_project_menu_items.append(two)
     new_project_menu_items.append(three)
@@ -955,20 +783,20 @@ def new_project_submit(name, description, time_sensitive, date_year, date_month,
     
     undo.configure(command=clear_mains)
 
-    plus = tk.Button(text="➕", font=("Helvetica", 16, BOLD), bd=0, highlightthickness=0, bg="black", fg="white")
+    plus = tk.Button(text="➕", font=("Helvetica", 16, "bold"), bd=0, highlightthickness=0, bg="black", fg="white")
     plus.configure(command=how_many_mains)
     plus.place(anchor="n", relx=0.5, rely=0.4)
     new_project_menu_items.append(plus)
 
-def create_new_main(project:Project, name:tk.Entry, label, create, relx):
+def create_new_main(project:ds.Project, name:tk.Entry, label, create, relx):
     sub_items = []
     play_click()
     if name.get() == "":
         messagebox.showerror("No Main Name", "Please enter a project name.")
         return None
     YOFF = 0.05
-    new_main = project.add_main(project, name.get())
-    main_name_label = tk.Label(font=("Helvetica", 20, BOLD), bd=0, highlightthickness=0, bg="#abcaf6", justify="center")
+    new_main = project.add_main(name.get())
+    main_name_label = tk.Label(font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center")
     new_project_menu_items.append(main_name_label)
     main_name_label.configure(text=name.get())
     try:
@@ -978,25 +806,25 @@ def create_new_main(project:Project, name:tk.Entry, label, create, relx):
     except:
         return None
     main_name_label.place(anchor="center", relx=relx, rely=0.48-YOFF)
-    one_main = tk.Button(text="1", font=("Helvetica", 20, BOLD), bd=0, highlightthickness=0, bg="green", fg="black")
-    two_main = tk.Button(text="2", font=("Helvetica", 20, BOLD), bd=0, highlightthickness=0, bg="green", fg="black")
-    three_main = tk.Button(text="3", font=("Helvetica", 20, BOLD), bd=0, highlightthickness=0, bg="green", fg="black")
+    one_main = tk.Button(text="1", font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black")
+    two_main = tk.Button(text="2", font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black")
+    three_main = tk.Button(text="3", font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black")
     new_project_menu_items.append(one_main)
     new_project_menu_items.append(two_main)
     new_project_menu_items.append(three_main)
-    canvas1 = tk.Canvas(window, bd=0, highlightthickness=0, bg="black")
-    name_label1 = tk.Label(font=("Helvetica", 18, BOLD), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
+    canvas1 = tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black")
+    name_label1 = tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
     sub_name1 = tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center")
-    sub_create1 = tk.Button(font=("Helvetica", 16, BOLD), text="Submit", bg="green", bd=0, highlightthickness=0)
-    canvas2 = tk.Canvas(window, bd=0, highlightthickness=0, bg="black")
-    name_label2 = tk.Label(font=("Helvetica", 18, BOLD), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
+    sub_create1 = tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
+    canvas2 = tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black")
+    name_label2 = tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
     sub_name2 = tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center")
-    sub_create2 = tk.Button(font=("Helvetica", 16, BOLD), text="Submit", bg="green", bd=0, highlightthickness=0)
-    canvas3 = tk.Canvas(window, bd=0, highlightthickness=0, bg="black")
-    name_label3 = tk.Label(font=("Helvetica", 18, BOLD), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
+    sub_create2 = tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
+    canvas3 = tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black")
+    name_label3 = tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
     sub_name3 = tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center")
-    sub_create3 = tk.Button(font=("Helvetica", 16, BOLD), text="Submit", bg="green", bd=0, highlightthickness=0)
-    sub_create = tk.Button(text="➕", font=("Helvetica", 14, BOLD), bd=0, highlightthickness=0, bg="black", fg="white")
+    sub_create3 = tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
+    sub_create = tk.Button(text="➕", font=("Helvetica", 14, "bold"), bd=0, highlightthickness=0, bg="black", fg="white")
     def how_many_subs():
         play_click()
         one_main.configure(command=lambda n=1 : build_subs(n))
@@ -1137,9 +965,9 @@ def create_new_main(project:Project, name:tk.Entry, label, create, relx):
     new_project_menu_items.append(sub_create)
     return new_main
 
-def create_new_sub(main, name:tk.Entry, label, create, relx):
+def create_new_sub(main:ds.Main, name_entry:tk.Entry):
     play_click()
-    new_sub = main.add_sub(main, name.get())
+    new_sub = main.add_main(name_entry.get())
     print(new_sub)
 
 def exploded_view():
@@ -1166,15 +994,14 @@ def open_project():
     #Create UI for created project by reading json file
     pass
 
-
-cntue2 = tk.Button(bg="#e4eff6", font=("Times New Roman", 8, BOLD), bd=0, highlightthickness=0)
-cntue3 = tk.Button(bg="#e4eff6", font=("Times New Roman", 8, BOLD), bd=0, highlightthickness=0)
-cntue4 = tk.Button(bg="#e4eff6", font=("Times New Roman", 10, BOLD), bd=0, highlightthickness=0)
-cntue5 = tk.Button(bg="#e4eff6", font=("Times New Roman", 6, BOLD), bd=0, highlightthickness=0)
-cntue6 = tk.Button(bg="#e4eff6", font=("Times New Roman", 8, BOLD), bd=0, highlightthickness=0)
-cntue7 = tk.Button(bg="#e4eff6", font=("Times New Roman", 8, BOLD), bd=0, highlightthickness=0)
-cntue8 = tk.Button(bg="#e4eff6", font=("Times New Roman", 8, BOLD), bd=0, highlightthickness=0)
-cntue9 = tk.Button(bg="#e4eff6", font=("Times New Roman", 6, BOLD), bd=0, highlightthickness=0)
+cntue2 = tk.Button(bg="#e4eff6", font=("Times New Roman", 8, "bold"), bd=0, highlightthickness=0)
+cntue3 = tk.Button(bg="#e4eff6", font=("Times New Roman", 8, "bold"), bd=0, highlightthickness=0)
+cntue4 = tk.Button(bg="#e4eff6", font=("Times New Roman", 10, "bold"), bd=0, highlightthickness=0)
+cntue5 = tk.Button(bg="#e4eff6", font=("Times New Roman", 6, "bold"), bd=0, highlightthickness=0)
+cntue6 = tk.Button(bg="#e4eff6", font=("Times New Roman", 8, "bold"), bd=0, highlightthickness=0)
+cntue7 = tk.Button(bg="#e4eff6", font=("Times New Roman", 8, "bold"), bd=0, highlightthickness=0)
+cntue8 = tk.Button(bg="#e4eff6", font=("Times New Roman", 8, "bold"), bd=0, highlightthickness=0)
+cntue9 = tk.Button(bg="#e4eff6", font=("Times New Roman", 6, "bold"), bd=0, highlightthickness=0)
 cntue2.configure(command=new_or_old_project_screen)
 cntue3.configure(command=new_or_old_project_screen)
 cntue4.configure(command=new_or_old_project_screen)
@@ -1191,13 +1018,12 @@ cntue6.place(relx=0.5, rely=0.38875)
 cntue7.place(relx=0.49, rely=0.395)
 cntue8.place(relx=0.515, rely=0.3775)
 cntue9.place(relx=0.43975, rely=0.3875)
-cntue = tk.Button(text="▶", bg="#e4eff6", bd=0, highlightthickness=0, font=("Helvetica", 16, BOLD), height=0)
+cntue = tk.Button(text="▶", bg="#e4eff6", bd=0, highlightthickness=0, font=("Helvetica", 16, "bold"), height=0)
 cntue.configure(command=new_or_old_project_screen)
 cntue.place(relx=0.49, rely=0.4, anchor="center")
 settings = tk.Button(text="⚙️", bg="#414449", bd=0, highlightthickness=0, font=("Helvetica", 26), height=0, fg="white")
-#settings.configure()
 settings.place(relx=0.87, rely=0.87)
-new_project_button = tk.Button(text="New Project", font=("Consolas", 16, BOLD), bg="#404449", bd=0, highlightthickness=0)
-old_project_button = tk.Button(text="Open Project", font=("Consolas", 16, BOLD), bg="#404449", bd=0, highlightthickness=0)
+new_project_button = tk.Button(text="New Project", font=("Consolas", 16, "bold"), bg="#404449", bd=0, highlightthickness=0)
+old_project_button = tk.Button(text="Open Project", font=("Consolas", 16, "bold"), bg="#404449", bd=0, highlightthickness=0)
 
-window.mainloop()
+gv.window.mainloop()

@@ -1,7 +1,7 @@
 import ui
 
 def main():
-    print("program ran")
+    ui.init()
 
 if __name__ == '__main__':
     main()

@@ -16,7 +16,7 @@ class Main:
             else:
                 self.deadline = deadline
         else:
-            self.deadline = None
+            self.deadline = ""
 
     def add_main(self, name:str, desc="", time_sensitive=False, deadline="00/00/0000", notes=""):
         new_main = Main(self, name, desc, time_sensitive, deadline, notes)
@@ -58,11 +58,11 @@ class Main:
         return new_month + "/" + str(date_list[1]) + "/" + str(date_list[2])
 
     def calculate_days_left(self) -> float:
-        deadline_as_date = date(int(self.deadline[-4]), int(self.deadline[3:5]), int(self.deadline[0:2]))
-        return (deadline_as_date - datetime.now().date()).days
+        if not self.time_sensitive:
+            return ""
 
-    def isParent(self) -> bool:
-        return len(self.mains) > 0
+        deadline_as_date = date(int(self.deadline[-4:]), ((int(self.deadline[0:2])) if (int(self.deadline[0:2]) >= 10) else (int(self.deadline[1:2]))), ((int(self.deadline[3:5])) if ((int(self.deadline[3:5]) >= 10)) else (int(self.deadline[4:5]))))
+        return ((deadline_as_date - datetime.now().date()).days) + " DAYS LEFT"
 
     def __repr__(self) -> str:
         return f'(Name:"{self.name}", Description:"{self.description}", TimeSensitive:"{self.time_sensitive}", Deadline:"{self.deadline}", Notes:"{self.notes}", Mains:{self.mains})'
@@ -82,7 +82,7 @@ class Project:
             else:
                 self.deadline = deadline
         else:
-            self.deadline = None
+            self.deadline = ""
 
     def add_main(self, name:str, desc="", time_sensitive=False, deadline="00/00/0000", notes="") -> Main:
         new_main = Main(self, name, desc, time_sensitive, deadline, notes)
@@ -124,8 +124,11 @@ class Project:
         return new_month + "/" + str(date_list[1]) + "/" + str(date_list[2])
 
     def calculate_days_left(self) -> float:
+        if not self.time_sensitive:
+            return ""
+
         deadline_as_date = date(int(self.deadline[-4:]), ((int(self.deadline[0:2])) if (int(self.deadline[0:2]) >= 10) else (int(self.deadline[1:2]))), ((int(self.deadline[3:5])) if ((int(self.deadline[3:5]) >= 10)) else (int(self.deadline[4:5]))))
-        return (deadline_as_date - datetime.now().date()).days
+        return ((deadline_as_date - datetime.now().date()).days) + " DAYS LEFT"
 
     def __repr__(self) -> str:
         return f'(Name:"{self.name}", Description:"{self.description}", TimeSensitive:"{self.time_sensitive}", Deadline:"{self.deadline}", Notes:"{self.notes}", Mains:{self.mains})'

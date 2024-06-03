@@ -6,6 +6,7 @@ import animations as anim
 import tkinter as tk
 import random as rr
 import constants
+import fileutil
 import sounds
 import uiutil
 import ds
@@ -172,30 +173,28 @@ def new_project_screen(back):
     back.place(relx=0.002*9, rely=0.002*16, anchor="nw")
     back.tkraise()
 
-def new_project_submit(name, description, time_sensitive, date_year, date_month, date_day, notes):
+def new_project_submit(name, description, time_sensitive, date_year:tk.StringVar, date_month:tk.StringVar, date_day:tk.StringVar, notes):
     global new_project
     sounds.play_click()
     if name.get() == "":
         messagebox.showerror("No Project Name", "Please enter a project name.")
         return
     
-    try:
-        date_mo = uiutil.determine_month(date_month.get())
-        date_dy = uiutil.determine_day(date_day.get())
-    except:
-        if time_sensitive[0] == True:
-            messagebox.showerror("No Project Date", "Please enter a project date.")
-        else:
-            pass
-
-    new_date = date_mo + "/" + date_dy + "/" + date_year.get()
-    
-    if time_sensitive[0] == True:
+    if time_sensitive[0] == True and ((date_month.get() == "") or (date_day.get() == "") or (date_year.get() == "")):
+        messagebox.showerror("No Project Date", "Please enter a project date.")
+        return
+    elif time_sensitive[0] == True:
         if not ds.Project.date_after_current(date(int(date_year.get()), int(date_mo), int(date_dy))):
             messagebox.showerror("Invalid Date", "Date entered is before or equal to the date today.")
             return
+
+    date_mo = uiutil.determine_month(date_month.get())
+    date_dy = uiutil.determine_day(date_day.get())
+    new_date = date_mo + "/" + date_dy + "/" + ((date_year.get()) if ((date_year.get()) != "") else ("0000"))
     
     new_project = ds.Project(name.get(), description.get(), time_sensitive[0], new_date, notes.get())
+    gv.project = new_project
+    fileutil.save_project()
 
     for widget in np_menu_items:
         widget.place_forget()
@@ -215,7 +214,7 @@ def new_project_submit(name, description, time_sensitive, date_year, date_month,
     Lproject_desc = tk.Label(text=new_project.description, font=("Helvetica", 14, "bold"), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
     Lproject_desc.place(anchor="n", relx=0.5, rely=0.225)
     Lproject_days_left = tk.Label(font=("Helvetica", 22, "bold"), bg="#abcaf6", fg="red", bd=0, highlightthickness=0)
-    Lproject_days_left.configure(text=f"{new_project.calculate_days_left()} DAYS LEFT") 
+    Lproject_days_left.configure(text=f"{new_project.calculate_days_left()}") 
     Lproject_days_left.place(anchor="n", relx=0.5, rely=0.06875)
 
     Lproject_notes = tk.Label(text=new_project.notes, font=("Helvetica", 14, "bold"), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)

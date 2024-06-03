@@ -1,4 +1,5 @@
 import globalvariables as gv
+import constants
 import json
 import ds
 import os
@@ -23,23 +24,18 @@ def load_project(filename:str) -> None:
     mains = data["projectdata"]["mains"]
     gv.project.build_mains(gv.project, mains)
 
-def save_project(filename:str) -> None:
+def save_project() -> None:
     data:dict = {}
-    file_dir = rf"{filename}"
+    file_dir = constants.USER_PROJECTS_PATH + rf"\{gv.project.name}.json"
 
     data = {
-        "projectdata": gv.project.as_dict()
+        gv.project.name : gv.project.as_dict()
     }
 
     try:
         os.remove(file_dir)
     except FileNotFoundError:
-        return
+        pass
     
     with open(file_dir, "w") as file:
         json.dump(data, file, indent=4)
-    
-load_project(r"C:\Users\Domth\Desktop\MyCode\FlowNote\UserProjects\projectname.json")
-print()
-print(gv.project)
-save_project(r"C:\Users\Domth\Desktop\MyCode\FlowNote\UserProjects\project.json")

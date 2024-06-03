@@ -18,9 +18,10 @@ class Main:
         else:
             self.deadline = None
 
-    def add_main(self, name:str) -> None:
-        new_main = Main(self, name)
+    def add_main(self, name:str, desc="", time_sensitive=False, deadline="00/00/0000", notes=""):
+        new_main = Main(self, name, desc, time_sensitive, deadline, notes)
         self.mains.append(new_main)
+        return new_main
     
     def edit_name(self, new_name:str) -> None:
         self.name = new_name
@@ -60,8 +61,11 @@ class Main:
         deadline_as_date = date(int(self.deadline[-4]), int(self.deadline[3:5]), int(self.deadline[0:2]))
         return (deadline_as_date - datetime.now().date()).days
 
+    def isParent(self) -> bool:
+        return len(self.mains) > 0
+
     def __repr__(self) -> str:
-        return f'(Name:"{self.name}", Description:"{self.description}", TimeSensitive:"{self.time_sensitive}", Deadline:"{self.deadline}", Notes:"{self.notes}", Children:{self.subs})'
+        return f'(Name:"{self.name}", Description:"{self.description}", TimeSensitive:"{self.time_sensitive}", Deadline:"{self.deadline}", Notes:"{self.notes}", Mains:{self.mains})'
 
 class Project:
     def __init__(self, name="", description="", time_sensitive=False, deadline="00/00/0000", notes="") -> None:
@@ -70,6 +74,7 @@ class Project:
         self.time_sensitive = time_sensitive
         self.notes = notes
         self.mains = []
+        self.result = []
 
         if self.time_sensitive:
             if deadline == "00/00/0000":
@@ -79,9 +84,10 @@ class Project:
         else:
             self.deadline = None
 
-    def add_main(self, name:str) -> None:
-        new_main = Main(self, name)
+    def add_main(self, name:str, desc="", time_sensitive=False, deadline="00/00/0000", notes="") -> Main:
+        new_main = Main(self, name, desc, time_sensitive, deadline, notes)
         self.mains.append(new_main)
+        return new_main
 
     def edit_name(self, new_name:str) -> None:
         self.name = new_name
@@ -123,13 +129,37 @@ class Project:
 
     def __repr__(self) -> str:
         return f'(Name:"{self.name}", Description:"{self.description}", TimeSensitive:"{self.time_sensitive}", Deadline:"{self.deadline}", Notes:"{self.notes}", Mains:{self.mains})'
-    
-    def return_as_dict(self) -> dict:
+
+    def build_mains(self, parent, mains=[]) -> None:
+        if len(mains) == 0:
+            return
+        
+        for main in mains:
+            new_main = parent.add_main(main["name"], main["description"], main["time_sensitive"], main["deadline"], main["notes"])
+            if (len(main["mains"]) == 0):
+                continue
+            self.build_mains(new_main, main["mains"])
+
+    def mains_dict_list(self, mains:list[Main]) -> list:
+        result = []
+        for main in mains:
+            result.append({
+                "name": main.name,
+                "description": main.description,
+                "time_sensitive": str(main.time_sensitive),
+                "deadline": main.deadline,
+                "notes": main.notes,
+                "mains": self.mains_dict_list(main.mains)
+            })
+        return result       
+
+    def as_dict(self) -> dict:
         return {
             "Name": self.name,
             "Description": self.description,
-            "TimeSensitive": self.time_sensitive,
+            "TimeSensitive": str(self.time_sensitive),
             "Deadline": self.deadline,
             "Notes": self.notes,
-            "Mains": self.mains
+            "Mains": self.mains_dict_list(self.mains)
         }
+    

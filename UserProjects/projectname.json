@@ -1,7 +1,95 @@
 {
-    "projectname": {
-        "projectdata": {
-            
-        }
-    }       
+    "projectdata": {
+        "name": "FlowNote",
+        "description": "An application to organize large projects into deconstructed pieces.",
+        "time_sensitive": "True",
+        "deadline": "08/01/2024",
+        "notes": "none",
+        "mains": [
+            {
+                "name": "Main1",
+                "description": "",
+                "time_sensitive": "True",
+                "deadline": "07/01/2024",
+                "notes": "none",
+                "mains": [
+                    {
+                        "name": "Sub1",
+                        "description": "",
+                        "time_sensitive": "True",
+                        "deadline": "06/29/2024",
+                        "notes": "none",
+                        "mains": [
+                            {
+                                "name": "SubSub1",
+                                "description": "",
+                                "time_sensitive": "True",
+                                "deadline": "06/28/2024",
+                                "notes": "none",
+                                "mains": []
+                            },
+                            {
+                                "name": "SubSub2",
+                                "description": "",
+                                "time_sensitive": "True",
+                                "deadline": "06/28/2024",
+                                "notes": "none",
+                                "mains": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Sub2",
+                        "description": "",
+                        "time_sensitive": "True",
+                        "deadline": "06/30/2024",
+                        "notes": "none",
+                        "mains": []
+                    }
+                ]
+            },
+            {
+                "name": "Main2",
+                "description": "",
+                "time_sensitive": "True",
+                "deadline": "07/02/2024",
+                "notes": "none",
+                "mains": [
+                    {
+                        "name": "Sub1",
+                        "description": "",
+                        "time_sensitive": "True",
+                        "deadline": "06/20/2024",
+                        "notes": "none",
+                        "mains": [
+                            {
+                                "name": "SubSub1",
+                                "description": "",
+                                "time_sensitive": "True",
+                                "deadline": "06/25/2024",
+                                "notes": "none",
+                                "mains": []
+                            },
+                            {
+                                "name": "SubSub2",
+                                "description": "",
+                                "time_sensitive": "True",
+                                "deadline": "06/20/2024",
+                                "notes": "none",
+                                "mains": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Sub2",
+                        "description": "",
+                        "time_sensitive": "True",
+                        "deadline": "06/30/2024",
+                        "notes": "none",
+                        "mains": []
+                    }
+                ]
+            }
+        ]
+    }
 }

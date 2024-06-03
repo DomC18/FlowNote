@@ -754,7 +754,7 @@ def process_data():
     #Goes through Previous User JSONs with Project Data and puts it into a format where the file can be edited
     pass
 
-def old_project_list_screen():
+def old_project_screen():
     #Create UI for saved projects screen by accessing User Projects folder
     pass
 

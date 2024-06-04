@@ -4,6 +4,11 @@ import json
 import ds
 import os
 
+def update_existing_names() -> None:
+    gv.existing_names = []
+    for file in os.listdir(constants.USER_PROJECTS_PATH):
+        gv.existing_names.append(file.split(".")[0])
+
 def load_project(filename:str) -> None:
     data:dict = {}
     file_dir = rf"{filename}"

@@ -32,7 +32,7 @@ class Main:
     def edit_time_sensitivity(self, new_timesensitivity:bool) -> None:
         self.time_sensitive = new_timesensitivity
     
-    def edit_deadline(self, new_deadline) -> None:
+    def edit_deadline(self, new_deadline:str) -> None:
         self.deadline = new_deadline
     
     def edit_notes(self, new_notes:str) -> None:
@@ -62,7 +62,7 @@ class Main:
             return ""
 
         deadline_as_date = date(int(self.deadline[-4:]), ((int(self.deadline[0:2])) if (int(self.deadline[0:2]) >= 10) else (int(self.deadline[1:2]))), ((int(self.deadline[3:5])) if ((int(self.deadline[3:5]) >= 10)) else (int(self.deadline[4:5]))))
-        return ((deadline_as_date - datetime.now().date()).days) + " DAYS LEFT"
+        return str((deadline_as_date - datetime.now().date()).days) + " DAYS LEFT"
 
     def __repr__(self) -> str:
         return f'(Name:"{self.name}", Description:"{self.description}", TimeSensitive:"{self.time_sensitive}", Deadline:"{self.deadline}", Notes:"{self.notes}", Mains:{self.mains})'
@@ -98,7 +98,7 @@ class Project:
     def edit_time_sensitivity(self, new_timesensitivity:bool) -> None:
         self.time_sensitive = new_timesensitivity
 
-    def edit_deadline(self, new_deadline) -> None:
+    def edit_deadline(self, new_deadline:str) -> None:
         self.deadline = new_deadline
 
     def edit_notes(self, new_notes:str) -> None:
@@ -128,7 +128,7 @@ class Project:
             return ""
 
         deadline_as_date = date(int(self.deadline[-4:]), ((int(self.deadline[0:2])) if (int(self.deadline[0:2]) >= 10) else (int(self.deadline[1:2]))), ((int(self.deadline[3:5])) if ((int(self.deadline[3:5]) >= 10)) else (int(self.deadline[4:5]))))
-        return ((deadline_as_date - datetime.now().date()).days) + " DAYS LEFT"
+        return str((deadline_as_date - datetime.now().date()).days) + " DAYS LEFT"
 
     def __repr__(self) -> str:
         return f'(Name:"{self.name}", Description:"{self.description}", TimeSensitive:"{self.time_sensitive}", Deadline:"{self.deadline}", Notes:"{self.notes}", Mains:{self.mains})'

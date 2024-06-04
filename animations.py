@@ -16,7 +16,7 @@ gv.stars = []
 gv.star_loop = [None]
 blur_func_calls = 0
 
-def forward_blur_animation(radius):
+def forward_blur_animation(radius:int) -> None:
     if radius == 1:
         for widget in gv.main_menu_buttons:
             widget.place_forget()
@@ -27,7 +27,7 @@ def forward_blur_animation(radius):
     if radius < 6:
         gv.window.after(75, forward_blur_animation, radius + 1)
 
-def backward_blur_animation(radius, back, new_project, old_project):
+def backward_blur_animation(radius:int, back:tk.Button, new_project:tk.Button, old_project:tk.Button) -> None:
     global blur_func_calls
     if blur_func_calls == 0:
         sounds.play_click()
@@ -69,7 +69,7 @@ def backward_blur_animation(radius, back, new_project, old_project):
 
 
 
-def proj_bg_pos_generator():
+def proj_bg_pos_generator() -> list:
     screen_range = range(1, 1001)
     current_poss = []
     all_poss = []
@@ -83,7 +83,7 @@ def proj_bg_pos_generator():
         all_poss.append(curr_pos)
     return all_poss
 
-def proj_bg_hor():
+def proj_bg_hor() -> None:
     gv.stars = []
     logo = Image.open(constants.LOGO_WITH_SKY_ICON)
     x_increase = 1/42
@@ -101,7 +101,7 @@ def proj_bg_hor():
         idx += 1
         gv.stars.append((logo_label, x_increase*idx, y, rr.choice(speed_range) / 10000, rr.choice(degrees_range)))
     
-    def loop_l():
+    def loop_l() -> str:
         for idx, star_comb in enumerate(gv.stars):
             star_comb = list(star_comb)
             try:
@@ -119,7 +119,7 @@ def proj_bg_hor():
         gv.star_loop[0] = this_loop
         return this_loop
 
-    def loop_r():
+    def loop_r() -> str:
         for idx, star_comb in enumerate(gv.stars):
             star_comb = list(star_comb)
             try:
@@ -150,7 +150,7 @@ def proj_bg_hor():
     else:
         start_rstar_loop()
 
-def proj_bg_vert():
+def proj_bg_vert() -> None:
     gv.stars = []
     logo = Image.open(constants.LOGO_WITH_SKY_ICON)
     x_positions = proj_bg_pos_generator()
@@ -168,7 +168,7 @@ def proj_bg_vert():
         idx += 1
         gv.stars.append((logo_label, x, y_increase*idx, rr.choice(speed_range) / 10000, rr.choice(degrees_range)))
     
-    def loop_n():
+    def loop_n() -> str:
         for idx, star_comb in enumerate(gv.stars):
             star_comb = list(star_comb)
             try:
@@ -186,7 +186,7 @@ def proj_bg_vert():
         gv.star_loop[0] = this_loop
         return this_loop
     
-    def loop_s():
+    def loop_s() -> str:
         for idx, star_comb in enumerate(gv.stars):
             star_comb = list(star_comb)
             try:

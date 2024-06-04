@@ -31,20 +31,20 @@ sky_label = tk.Label(gv.window, image=sky_photo)
 sky_label.image = sky_photo
 back = tk.Button()
 undo = tk.Button(text="↩", font=("Helvetica", 20, "bold"), bg="black", fg="white", relief="raised")
-new_project:ds.Project
 np_menu_items = []
 main_ct = [0]
-main_canvas_size = [0]
+main_canvas_size = []
 main_canvas_north_y = [0]
 main_xs = []
+main_cys = []
 
 new_project_button = tk.Button(text="New Project", font=("Consolas", 16, "bold"), bg="#404449", bd=0, highlightthickness=0)
 old_project_button = tk.Button(text="Open Project", font=("Consolas", 16, "bold"), bg="#404449", bd=0, highlightthickness=0)
 
 
 
-def project_select_screen():
-    global new_project, np_menu_items
+def project_select_screen() -> None:
+    global np_menu_items
 
     try: 
         gv.window.after_cancel(gv.star_loop[0])
@@ -68,17 +68,14 @@ def project_select_screen():
     gv.window.configure(bg="#414449")
     anim.forward_blur_animation(1)
     back.configure(bg="#414449", fg="white", text="← Main Menu", font=("Helvetica", 16, "bold"), relief="flat")
-    def button_press(event):
-        back.config(relief=tk.RAISED)
     back.configure(command=lambda b=back, n=new_project_button, o=old_project_button : anim.backward_blur_animation(6, b, n, o))
-    back.bind("<ButtonPress-1>", button_press)
     back.place(relx=0.02, rely=0.02, anchor="nw")
     gv.logo_label.pack()
     new_project_button.configure(command=lambda b=back : new_project_screen(b))
     new_project_button.place(relx=0.5, rely=1/3, anchor="center")
     old_project_button.place(relx=0.5, rely=2/3, anchor="center")
 
-def new_project_screen(back):
+def new_project_screen(back:tk.Button) -> None:
     sounds.play_click()
     sky_label.pack()
     choices = [0, 1]
@@ -104,7 +101,7 @@ def new_project_screen(back):
     project_day.configure(font=("Helvetica", 18), bd=0, highlightthickness=0)
     project_year.configure(font=("Helvetica", 18), bd=0, highlightthickness=0)
 
-    def time_sensitive_true(a:tk.Button, b:tk.Button):
+    def time_sensitive_true(a:tk.Button, b:tk.Button) -> None:
         sounds.play_click()
         time_sensitive[0] = True
         a.configure(relief="sunken")
@@ -113,7 +110,7 @@ def new_project_screen(back):
         project_day.place(relx=0.5, rely=4/7, anchor="center")
         project_year.place(relx=0.5+0.035, rely=4/7, anchor="w")
         date_to_complete_label.place(anchor="s", relx=0.5, rely=(4/7)-0.03)
-    def time_sensitive_false(a:tk.Button, b:tk.Button):
+    def time_sensitive_false(a:tk.Button, b:tk.Button) -> None:
         sounds.play_click()
         time_sensitive[0] = False
         a.configure(relief="raised")
@@ -173,27 +170,31 @@ def new_project_screen(back):
     back.place(relx=0.002*9, rely=0.002*16, anchor="nw")
     back.tkraise()
 
-def new_project_submit(name, description, time_sensitive, date_year:tk.StringVar, date_month:tk.StringVar, date_day:tk.StringVar, notes):
-    global new_project
-    sounds.play_click()
+def new_project_submit(name:tk.Entry, description:tk.Entry, time_sensitive:list, date_year:tk.StringVar, date_month:tk.StringVar, date_day:tk.StringVar, notes:tk.Entry) -> None:
+    fileutil.update_existing_names()
     if name.get() == "":
         messagebox.showerror("No Project Name", "Please enter a project name.")
         return
+    elif name.get() in gv.existing_names:
+        messagebox.showerror("Duplicate Project Name", "A project with that name already exists.")
+        return
     
+    date_mo = ""
+    date_dy = ""
     if time_sensitive[0] == True and ((date_month.get() == "") or (date_day.get() == "") or (date_year.get() == "")):
         messagebox.showerror("No Project Date", "Please enter a project date.")
         return
     elif time_sensitive[0] == True:
+        date_mo = uiutil.determine_month(date_month.get())
+        date_dy = uiutil.determine_day(date_day.get())
         if not ds.Project.date_after_current(date(int(date_year.get()), int(date_mo), int(date_dy))):
             messagebox.showerror("Invalid Date", "Date entered is before or equal to the date today.")
             return
 
-    date_mo = uiutil.determine_month(date_month.get())
-    date_dy = uiutil.determine_day(date_day.get())
+    sounds.play_click()
     new_date = date_mo + "/" + date_dy + "/" + ((date_year.get()) if ((date_year.get()) != "") else ("0000"))
     
-    new_project = ds.Project(name.get(), description.get(), time_sensitive[0], new_date, notes.get())
-    gv.project = new_project
+    gv.project = ds.Project(name.get(), description.get(), time_sensitive[0], new_date, notes.get())
     fileutil.save_project()
 
     for widget in np_menu_items:
@@ -203,347 +204,104 @@ def new_project_submit(name, description, time_sensitive, date_year:tk.StringVar
     canvas.place(anchor="n", relx=0.5, rely=0)
     canvas.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
     canvas.create_oval(7.5, 7.5, 650, 300, fill="#abcaf6", outline="white", width=3)
-    Lproject_name = tk.Label(text=new_project.name, bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
-    if len(new_project.name) <= 17:
+    Lproject_name = tk.Label(text=gv.project.name, bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
+    if len(gv.project.name) <= 17:
         Lproject_name.configure(font=("Helvetica", 50, "bold"))
         Lproject_name.place(anchor="n", relx=0.5, rely=0.1175)
-    elif len(new_project.name) <= 30:
+    elif len(gv.project.name) <= 30:
         Lproject_name.configure(font=("Helvetica", 32, "bold"))
         Lproject_name.place(anchor="n", relx=0.5, rely=0.13125)
     
-    Lproject_desc = tk.Label(text=new_project.description, font=("Helvetica", 14, "bold"), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
+    Lproject_desc = tk.Label(text=gv.project.description, font=("Helvetica", 14, "bold"), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
     Lproject_desc.place(anchor="n", relx=0.5, rely=0.225)
     Lproject_days_left = tk.Label(font=("Helvetica", 22, "bold"), bg="#abcaf6", fg="red", bd=0, highlightthickness=0)
-    Lproject_days_left.configure(text=f"{new_project.calculate_days_left()}") 
+    Lproject_days_left.configure(text=f"{gv.project.calculate_days_left()}") 
     Lproject_days_left.place(anchor="n", relx=0.5, rely=0.06875)
 
-    Lproject_notes = tk.Label(text=new_project.notes, font=("Helvetica", 14, "bold"), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
     np_menu_items.append(canvas)
     np_menu_items.append(Lproject_name)
     np_menu_items.append(Lproject_desc)
     np_menu_items.append(Lproject_days_left)
-    np_menu_items.append(Lproject_notes)
+    mains_setup()
 
-    canvas1 = tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black")
-    name_label1 = tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
-    main_name1 = tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center", validate="key", validatecommand=(char15, "%P"))
-    main_create1 = tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
-    canvas2 = tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black")
-    name_label2 = tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
-    main_name2 = tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center", validate="key", validatecommand=(char15, "%P"))
-    main_create2 = tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
-    canvas3 = tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black")
-    name_label3 = tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
-    main_name3 = tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center", validate="key", validatecommand=(char15, "%P"))
-    main_create3 = tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
-    canvas4 = tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black")
-    name_label4 = tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
-    main_name4 = tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center", validate="key", validatecommand=(char15, "%P"))
-    main_create4 = tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
-    canvas5 = tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black")
-    name_label5 = tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:")
-    main_name5 = tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center", validate="key", validatecommand=(char15, "%P"))
-    main_create5 = tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
-    one = tk.Button(text="1", font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black")
-    two = tk.Button(text="2", font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black")
-    three = tk.Button(text="3", font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black")
-    four = tk.Button(text="4", font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black")
-    five = tk.Button(text="5", font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black")
-    np_menu_items.append(one)
-    np_menu_items.append(two)
-    np_menu_items.append(three)
-    np_menu_items.append(four)
-    np_menu_items.append(five)
+
+def mains_setup() -> None:
+    canvases = [tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black") for _ in range(5)]
+    name_labels = [tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:") for _ in range(5)]
+    main_names = [tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center", validate="key", validatecommand=(char15, "%P")) for _ in range(5)]
+    main_creates = [tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0) for _ in range(5)]
+    quick_number_buttons = [tk.Button(text=str(i+1), font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black") for i in range(5)]
+    for i in range(5):
+        np_menu_items.append(quick_number_buttons[i])
 
     main_items = []
-    def how_many_mains():
+    def how_many_mains() -> None:
         sounds.play_click()
-        one.configure(command=lambda n=1 : build_mains(n))
-        two.configure(command=lambda n=2 : build_mains(n))
-        three.configure(command=lambda n=3 : build_mains(n))
-        four.configure(command=lambda n=4 : build_mains(n))
-        five.configure(command=lambda n=5 : build_mains(n))
-        one.place(anchor="e", relx=0.5095-0.038, rely=0.5)
-        two.place(anchor="e", relx=0.5095-0.019, rely=0.5)
-        three.place(anchor="center", relx=0.5, rely=0.5)
-        four.place(anchor="e", relx=0.5095+0.019, rely=0.5)
-        five.place(anchor="e", relx=0.5095+0.038, rely=0.5)
+        for i in range(5):
+            quick_number_buttons[i].configure(command=lambda n=i+1 : build_mains(n))
+            quick_number_buttons[i].place(anchor=(str("e") if (i != 2) else str("center")), relx=0.5+((i-2)*0.019), rely=0.5)
     
-    def build_mains(num:int):
+    def build_mains(num:int) -> None:
         sounds.play_click()
         plus.place_forget()
-        one.place_forget()
-        two.place_forget()
-        three.place_forget()
-        four.place_forget()
-        five.place_forget()
+        for i in range(5):
+            quick_number_buttons[i].place_forget()
         undo.place(anchor="nw", relx=0.0145*9, rely=0.002*16)
         undo.tkraise()
         np_menu_items.append(undo)
         YOFF = 0.05
+        main_canvas_north_y[0] = 0.35
+
         if num == 1:
-            main_canvas_size[0] = 255
-            main_canvas_north_y[0] = 0.4-YOFF
             main_xs.append([0.5])
-            canvas1.configure(width=415, height=255)
-            canvas1.place(anchor="n", relx=0.5, rely=0.4-YOFF)
-            canvas1.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvas1.create_oval(7.5, 7.5, 400, 240, fill="#abcaf6", outline="white", width=2)
-            name_label1.place(anchor="s", relx=0.5, rely=0.4475-YOFF)
-            main_name1.place(anchor="s", relx=0.5, rely=0.48-YOFF)
-            main_create1.configure(command=lambda p=new_project, n=main_name1, l=name_label1, c=main_create1 : create_new_main(p, n, l, c, 1/2))
-            main_create1.place(anchor="s", relx=0.5, rely=0.6125-YOFF)
-            np_menu_items.append(canvas1)
-            np_menu_items.append(name_label1)
-            np_menu_items.append(main_name1)
-            np_menu_items.append(main_create1)
-            main_items.append(canvas1)
-            main_items.append(name_label1)
-            main_items.append(main_name1)
-            main_items.append(main_create1)
+            main_cys.append(0.6125)
+            main_canvas_size.append(415)
+            main_canvas_size.append(255)
         elif num == 2:
-            main_canvas_size[0] = 255
-            main_canvas_north_y[0] = 0.4-YOFF
             main_xs.append([1/3, 2/3])
-            canvas1.configure(width=415, height=255)
-            canvas1.place(anchor="n", relx=1/3, rely=0.4-YOFF)
-            canvas1.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvas1.create_oval(7.5, 7.5, 400, 240, fill="#abcaf6", outline="white", width=2)
-            name_label1.place(anchor="s", relx=1/3, rely=0.4475-YOFF)
-            main_name1.place(anchor="s", relx=1/3, rely=0.48-YOFF)
-            main_create1.configure(command=lambda p=new_project, n=main_name1, l=name_label1, c=main_create1 : create_new_main(p, n, l, c, 1/3))
-            main_create1.place(anchor="s", relx=1/3, rely=0.6125-YOFF)
-            canvas2.configure(width=415, height=255)
-            canvas2.place(anchor="n", relx=2/3, rely=0.4-YOFF)
-            canvas2.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvas2.create_oval(7.5, 7.5, 400, 240, fill="#abcaf6", outline="white", width=2)
-            name_label2.place(anchor="s", relx=2/3, rely=0.4475-YOFF)
-            main_name2.place(anchor="s", relx=2/3, rely=0.48-YOFF)
-            main_create2.configure(command=lambda p=new_project, n=main_name2, l=name_label2, c=main_create2 : create_new_main(p, n, l, c, 2/3))
-            main_create2.place(anchor="s", relx=2/3, rely=0.6125-YOFF)
-            np_menu_items.append(canvas1)
-            np_menu_items.append(name_label1)
-            np_menu_items.append(main_name1)
-            np_menu_items.append(main_create1)
-            np_menu_items.append(canvas2)
-            np_menu_items.append(name_label2)
-            np_menu_items.append(main_name2)
-            np_menu_items.append(main_create2)
-            main_items.append(canvas1)
-            main_items.append(name_label1)
-            main_items.append(main_name1)
-            main_items.append(main_create1)
-            main_items.append(canvas2)
-            main_items.append(name_label2)
-            main_items.append(main_name2)
-            main_items.append(main_create2)
+            main_cys.append(0.6125)
+            main_canvas_size.append(415)
+            main_canvas_size.append(255)
         elif num == 3:
-            main_canvas_size[0] = 255
-            main_canvas_north_y[0] = 0.4-YOFF
             main_xs.append([1/4, 2/4, 3/4])
-            canvas1.configure(width=415, height=255)
-            canvas1.place(anchor="n", relx=1/4, rely=0.4-YOFF)
-            canvas1.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvas1.create_oval(7.5, 7.5, 400, 240, fill="#abcaf6", outline="white", width=2)
-            name_label1.place(anchor="s", relx=1/4, rely=0.4475-YOFF)
-            main_name1.place(anchor="s", relx=1/4, rely=0.48-YOFF)
-            main_create1.configure(command=lambda p=new_project, n=main_name1, l=name_label1, c=main_create1 : create_new_main(p, n, l, c, 1/4))
-            main_create1.place(anchor="s", relx=1/4, rely=0.6125-YOFF)
-            canvas2.configure(width=415, height=255)
-            canvas2.place(anchor="n", relx=2/4, rely=0.4-YOFF)
-            canvas2.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvas2.create_oval(7.5, 7.5, 400, 240, fill="#abcaf6", outline="white", width=2)
-            name_label2.place(anchor="s", relx=2/4, rely=0.4475-YOFF)
-            main_name2.place(anchor="s", relx=2/4, rely=0.48-YOFF)
-            main_create2.configure(command=lambda p=new_project, n=main_name2, l=name_label2, c=main_create2 : create_new_main(p, n, l, c, 2/4))
-            main_create2.place(anchor="s", relx=2/4, rely=0.6125-YOFF)
-            canvas3.configure(width=415, height=255)
-            canvas3.place(anchor="n", relx=3/4, rely=0.4-YOFF)
-            canvas3.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvas3.create_oval(7.5, 7.5, 400, 240, fill="#abcaf6", outline="white", width=2)
-            name_label3.place(anchor="s", relx=3/4, rely=0.4475-YOFF)
-            main_name3.place(anchor="s", relx=3/4, rely=0.48-YOFF)
-            main_create3.configure(command=lambda p=new_project, n=main_name3, l=name_label3, c=main_create3 : create_new_main(p, n, l, c, 3/4))
-            main_create3.place(anchor="s", relx=3/4, rely=0.6125-YOFF)
-            np_menu_items.append(canvas1)
-            np_menu_items.append(name_label1)
-            np_menu_items.append(main_name1)
-            np_menu_items.append(main_create1)
-            np_menu_items.append(canvas2)
-            np_menu_items.append(name_label2)
-            np_menu_items.append(main_name2)
-            np_menu_items.append(main_create2)
-            np_menu_items.append(canvas3)
-            np_menu_items.append(name_label3)
-            np_menu_items.append(main_name3)
-            np_menu_items.append(main_create3)
-            main_items.append(canvas1)
-            main_items.append(name_label1)
-            main_items.append(main_name1)
-            main_items.append(main_create1)
-            main_items.append(canvas2)
-            main_items.append(name_label2)
-            main_items.append(main_name2)
-            main_items.append(main_create2)
-            main_items.append(canvas3)
-            main_items.append(name_label3)
-            main_items.append(main_name3)
-            main_items.append(main_create3)
+            main_cys.append(0.6125)
+            main_canvas_size.append(415)
+            main_canvas_size.append(255)
         elif num == 4:
-            main_canvas_size[0] = 225
-            main_canvas_north_y[0] = 0.4-YOFF
-            main_xs.append([1/5, 2/5, 3/5, 4/5])
-            canvas1.configure(width=365, height=225)
-            canvas1.place(anchor="n", relx=1/5, rely=0.4-YOFF)
-            canvas1.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvas1.create_oval(7.5, 7.5, 350, 210, fill="#abcaf6", outline="white", width=2)
-            name_label1.place(anchor="s", relx=1/5, rely=0.4475-YOFF)
-            main_name1.place(anchor="s", relx=1/5, rely=0.48-YOFF)
-            main_create1.configure(command=lambda p=new_project, n=main_name1, l=name_label1, c=main_create1 : create_new_main(p, n, l, c, 1/5))
-            main_create1.place(anchor="s", relx=1/5, rely=0.5875-YOFF)
-            canvas2.configure(width=365, height=225)
-            canvas2.place(anchor="n", relx=2/5, rely=0.4-YOFF)
-            canvas2.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvas2.create_oval(7.5, 7.5, 350, 210, fill="#abcaf6", outline="white", width=2)
-            name_label2.place(anchor="s", relx=2/5, rely=0.4475-YOFF)
-            main_name2.place(anchor="s", relx=2/5, rely=0.48-YOFF)
-            main_create2.configure(command=lambda p=new_project, n=main_name2, l=name_label2, c=main_create2 : create_new_main(p, n, l, c, 2/5))
-            main_create2.place(anchor="s", relx=2/5, rely=0.5875-YOFF)
-            canvas3.configure(width=365, height=225)
-            canvas3.place(anchor="n", relx=3/5, rely=0.4-YOFF)
-            canvas3.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvas3.create_oval(7.5, 7.5, 350, 210, fill="#abcaf6", outline="white", width=2)
-            name_label3.place(anchor="s", relx=3/5, rely=0.4475-YOFF)
-            main_name3.place(anchor="s", relx=3/5, rely=0.48-YOFF)
-            main_create3.configure(command=lambda p=new_project, n=main_name3, l=name_label3, c=main_create3 : create_new_main(p, n, l, c, 3/5))
-            main_create3.place(anchor="s", relx=3/5, rely=0.5875-YOFF)
-            canvas4.configure(width=365, height=225)
-            canvas4.place(anchor="n", relx=4/5, rely=0.4-YOFF)
-            canvas4.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvas4.create_oval(7.5, 7.5, 350, 210, fill="#abcaf6", outline="white", width=2)
-            name_label4.place(anchor="s", relx=4/5, rely=0.4475-YOFF)
-            main_name4.place(anchor="s", relx=4/5, rely=0.48-YOFF)
-            main_create4.configure(command=lambda p=new_project, n=main_name4, l=name_label4, c=main_create4 : create_new_main(p, n, l, c, 4/5))
-            main_create4.place(anchor="s", relx=4/5, rely=0.5875-YOFF)
-            np_menu_items.append(canvas1)
-            np_menu_items.append(name_label1)
-            np_menu_items.append(main_name1)
-            np_menu_items.append(main_create1)
-            np_menu_items.append(canvas2)
-            np_menu_items.append(name_label2)
-            np_menu_items.append(main_name2)
-            np_menu_items.append(main_create2)
-            np_menu_items.append(canvas3)
-            np_menu_items.append(name_label3)
-            np_menu_items.append(main_name3)
-            np_menu_items.append(main_create3)
-            np_menu_items.append(canvas4)
-            np_menu_items.append(name_label4)
-            np_menu_items.append(main_name4)
-            np_menu_items.append(main_create4)
-            main_items.append(canvas1)
-            main_items.append(name_label1)
-            main_items.append(main_name1)
-            main_items.append(main_create1)
-            main_items.append(canvas2)
-            main_items.append(name_label2)
-            main_items.append(main_name2)
-            main_items.append(main_create2)
-            main_items.append(canvas3)
-            main_items.append(name_label3)
-            main_items.append(main_name3)
-            main_items.append(main_create3)
-            main_items.append(canvas4)
-            main_items.append(name_label4)
-            main_items.append(main_name4)
-            main_items.append(main_create4)
+            main_xs.append([0.75/5, (0.75+(3.5/3))/5, (0.75+2*(3.5/3))/5, 4.25/5])
+            main_cys.append(0.5875)
+            main_canvas_size.append(365)
+            main_canvas_size.append(225)
         elif num == 5:
-            main_canvas_size[0] = 195
-            main_canvas_north_y[0] = 0.4-YOFF
-            main_xs.append([1/6, 2/6, 3/6, 4/6, 5/6])
-            canvas1.configure(width=315, height=195)
-            canvas1.place(anchor="n", relx=1/6, rely=0.4-YOFF)
-            canvas1.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvas1.create_oval(7.5, 7.5, 300, 180, fill="#abcaf6", outline="white", width=2)
-            name_label1.place(anchor="s", relx=1/6, rely=0.4475-YOFF)
-            main_name1.place(anchor="s", relx=1/6, rely=0.48-YOFF)
-            main_create1.configure(command=lambda p=new_project, n=main_name1, l=name_label1, c=main_create1 : create_new_main(p, n, l, c, 1/6))
-            main_create1.place(anchor="s", relx=1/6, rely=0.5575-YOFF)
-            canvas2.configure(width=315, height=195)
-            canvas2.place(anchor="n", relx=2/6, rely=0.4-YOFF)
-            canvas2.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvas2.create_oval(7.5, 7.5, 300, 180, fill="#abcaf6", outline="white", width=2)
-            name_label2.place(anchor="s", relx=2/6, rely=0.4475-YOFF)
-            main_name2.place(anchor="s", relx=2/6, rely=0.48-YOFF)
-            main_create2.configure(command=lambda p=new_project, n=main_name2, l=name_label2, c=main_create2 : create_new_main(p, n, l, c, 2/6))
-            main_create2.place(anchor="s", relx=2/6, rely=0.5575-YOFF)
-            canvas3.configure(width=315, height=195)
-            canvas3.place(anchor="n", relx=3/6, rely=0.4-YOFF)
-            canvas3.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvas3.create_oval(7.5, 7.5, 300, 180, fill="#abcaf6", outline="white", width=2)
-            name_label3.place(anchor="s", relx=3/6, rely=0.4475-YOFF)
-            main_name3.place(anchor="s", relx=3/6, rely=0.48-YOFF)
-            main_create3.configure(command=lambda p=new_project, n=main_name3, l=name_label3, c=main_create3 : create_new_main(p, n, l, c, 3/6))
-            main_create3.place(anchor="s", relx=3/6, rely=0.5575-YOFF)
-            canvas4.configure(width=315, height=195)
-            canvas4.place(anchor="n", relx=4/6, rely=0.4-YOFF)
-            canvas4.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvas4.create_oval(7.5, 7.5, 300, 180, fill="#abcaf6", outline="white", width=2)
-            name_label4.place(anchor="s", relx=4/6, rely=0.4475-YOFF)
-            main_name4.place(anchor="s", relx=4/6, rely=0.48-YOFF)
-            main_create4.configure(command=lambda p=new_project, n=main_name4, l=name_label4, c=main_create4 : create_new_main(p, n, l, c, 4/6))
-            main_create4.place(anchor="s", relx=4/6, rely=0.5575-YOFF)
-            canvas5.configure(width=315, height=195)
-            canvas5.place(anchor="n", relx=5/6, rely=0.4-YOFF)
-            canvas5.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvas5.create_oval(7.5, 7.5, 300, 180, fill="#abcaf6", outline="white", width=2)
-            name_label5.place(anchor="s", relx=5/6, rely=0.4475-YOFF)
-            main_name5.place(anchor="s", relx=5/6, rely=0.48-YOFF)
-            main_create5.configure(command=lambda p=new_project, n=main_name5, l=name_label5, c=main_create5 : create_new_main(p, n, l, c, 5/6))
-            main_create5.place(anchor="s", relx=5/6, rely=0.5575-YOFF)
-            np_menu_items.append(canvas1)
-            np_menu_items.append(name_label1)
-            np_menu_items.append(main_name1)
-            np_menu_items.append(main_create1)
-            np_menu_items.append(canvas2)
-            np_menu_items.append(name_label2)
-            np_menu_items.append(main_name2)
-            np_menu_items.append(main_create2)
-            np_menu_items.append(canvas3)
-            np_menu_items.append(name_label3)
-            np_menu_items.append(main_name3)
-            np_menu_items.append(main_create3)
-            np_menu_items.append(canvas4)
-            np_menu_items.append(name_label4)
-            np_menu_items.append(main_name4)
-            np_menu_items.append(main_create4)
-            np_menu_items.append(canvas5)
-            np_menu_items.append(name_label5)
-            np_menu_items.append(main_name5)
-            np_menu_items.append(main_create5)
-            main_items.append(canvas1)
-            main_items.append(name_label1)
-            main_items.append(main_name1)
-            main_items.append(main_create1)
-            main_items.append(canvas2)
-            main_items.append(name_label2)
-            main_items.append(main_name2)
-            main_items.append(main_create2)
-            main_items.append(canvas3)
-            main_items.append(name_label3)
-            main_items.append(main_name3)
-            main_items.append(main_create3)
-            main_items.append(canvas4)
-            main_items.append(name_label4)
-            main_items.append(main_name4)
-            main_items.append(main_create4)
-            main_items.append(canvas5)
-            main_items.append(name_label5)
-            main_items.append(main_name5)
-            main_items.append(main_create5)
+            main_xs.append([0.5/6, (0.5+(5/4))/6, (0.5+2*(5/4))/6, (0.5+3*(5/4))/6, 5.5/6])
+            main_cys.append(0.5575)
+            main_canvas_size.append(315)
+            main_canvas_size.append(195)
+    
+        for i in range(num):
+            canvases[i].configure(width=main_canvas_size[0], height=main_canvas_size[1])
+            canvases[i].place(anchor="n", relx=main_xs[0][i], rely=0.35)
+            canvases[i].create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
+            canvases[i].create_oval(7.5, 7.5, main_canvas_size[0]-15, main_canvas_size[1]-15, fill="#abcaf6", outline="white", width=2)
+            name_labels[i].place(anchor="s", relx=main_xs[0][i], rely=0.4475-YOFF)
+            main_names[i].place(anchor="s", relx=main_xs[0][i], rely=0.48-YOFF)
+            main_creates[i].configure(command=lambda p=gv.project, n=main_names[i], l=name_labels[i], c=main_creates[i] : create_new_main(p, n, l, c, main_xs[0][i]))
+            main_creates[i].place(anchor="s", relx=main_xs[0][i], rely=main_cys[0]-YOFF)
+            np_menu_items.append(canvases[i])
+            np_menu_items.append(name_labels[i])
+            np_menu_items.append(main_names[i])
+            np_menu_items.append(main_creates[i])
+            main_items.append(canvases[i])
+            main_items.append(name_labels[i])
+            main_items.append(main_names[i])
+            main_items.append(main_creates[i])
         main_ct[0] = num
 
-    def clear_mains():
+    def clear_mains() -> None:
+        global main_xs, main_canvas_size, main_cys
+        main_xs.clear()
+        main_cys.clear()
+        main_canvas_size.clear()
         for widget in main_items:
             widget.place_forget()
         undo.place_forget()
@@ -556,7 +314,7 @@ def new_project_submit(name, description, time_sensitive, date_year:tk.StringVar
     plus.place(anchor="n", relx=0.5, rely=0.4)
     np_menu_items.append(plus)
 
-def create_new_main(project:ds.Project, name:tk.Entry, label, create, relx):
+def create_new_main(project:ds.Project, name:tk.Entry, label:tk.Label, create:tk.Button, relx:float) -> None:
     sub_items = []
     sounds.play_click()
     if name.get() == "":
@@ -593,7 +351,7 @@ def create_new_main(project:ds.Project, name:tk.Entry, label, create, relx):
     sub_name3 = tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center", validate="key", validatecommand=(char15, "%P"))
     sub_create3 = tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
     sub_create = tk.Button(text="➕", font=("Helvetica", 14, "bold"), bd=0, highlightthickness=0, bg="black", fg="white")
-    def how_many_subs():
+    def how_many_subs() -> None:
         sounds.play_click()
         one_main.configure(command=lambda n=1 : build_subs(n))
         two_main.configure(command=lambda n=2 : build_subs(n))
@@ -601,7 +359,7 @@ def create_new_main(project:ds.Project, name:tk.Entry, label, create, relx):
         one_main.place(anchor="e", relx=relx-0.01, rely=0.765-0.0425)
         two_main.place(anchor="center", relx=relx, rely=0.765-0.0425)
         three_main.place(anchor="w", relx=relx+0.01, rely=0.765-0.0425)
-    def build_subs(num:int):
+    def build_subs(num:int) -> None:
         sounds.play_click()
         sub_create.place_forget()
         one_main.place_forget()
@@ -733,36 +491,36 @@ def create_new_main(project:ds.Project, name:tk.Entry, label, create, relx):
     np_menu_items.append(sub_create)
     return new_main
 
-def create_new_sub(main:ds.Main, name_entry:tk.Entry):
+def create_new_sub(main:ds.Main, name_entry:tk.Entry) -> None:
     sounds.play_click()
     new_sub = main.add_main(name_entry.get())
 
-def exploded_view():
+def exploded_view() -> None:
     #Create view for exploded view of any project/main/sub
     pass
 
-def edit_details():
+def edit_details() -> None:
     #Create UI for editing (exploded view) and edit details of project/main/sub
     pass
 
-def add_notes():
+def add_notes() -> None:
     #Create UI for notetaking on project/main/sub and add to project/main/sub
     pass
 
-def process_data():
+def process_data() -> None:
     #Goes through Previous User JSONs with Project Data and puts it into a format where the file can be edited
     pass
 
-def old_project_screen():
+def old_project_screen() -> None:
     #Create UI for saved projects screen by accessing User Projects folder
     pass
 
-def open_project():
+def open_project() -> None:
     #Create UI for created project by reading json file
     pass
 
 
-def init():
+def init() -> None:
     cntue = tk.Button(text="▶", fg="black", bg="#e4eff6", bd=0, highlightthickness=0, font=("Helvetica", 16, "bold"), height=0)
     cntue2 = tk.Button(bg="#e4eff6", font=("Times New Roman", 8, "bold"), bd=0, highlightthickness=0)
     cntue3 = tk.Button(bg="#e4eff6", font=("Times New Roman", 8, "bold"), bd=0, highlightthickness=0)

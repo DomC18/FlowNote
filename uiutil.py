@@ -1,13 +1,13 @@
-def get_south_y(y_size_pixels:int, north_y:float):
+def get_south_y(y_size_pixels:int, north_y:float) -> float:
     return (y_size_pixels/1080)+north_y
 
-def calc_dist2(south_y):
+def calc_dist2(south_y:float) -> float:
     return south_y+((0.95-south_y)/2)
 
-def calc_dist3(south_y):
+def calc_dist3(south_y:float) -> float:
     return south_y+((0.95-south_y)/3)
 
-def calc_dist23(south_y):
+def calc_dist23(south_y:float) -> float:
     return south_y+((2*(0.95-south_y))/3)
 
 def determine_month(month:str) -> str:

@@ -12,10 +12,15 @@ import uiutil
 import ds
 
 gv.window.title("FlowNote")
-gv.window.geometry("600x600")
+width = 600
+height = 600
+horiz_offset = (gv.window.winfo_screenwidth() - width) / 2
+vert_offset = (gv.window.winfo_screenheight() - height) / 2
+gv.window.geometry(f"{width}x{height}+{int(horiz_offset)}+{int(vert_offset)}")
 gv.window.resizable(width=False, height=False)
 gv.window.configure(bg="#414449")
 gv.window.bind("<Escape>", quit)
+char2 = gv.window.register((lambda text: (True if len(text) <= 2 else False)))
 char15 = gv.window.register((lambda text: (True if len(text) <= 15 else False)))
 char30 = gv.window.register((lambda text: (True if len(text) <= 30 else False)))
 char100 = gv.window.register((lambda text: (True if len(text) <= 100 else False)))
@@ -226,26 +231,85 @@ def new_project_submit(name:tk.Entry, description:tk.Entry, time_sensitive:list,
 
 
 def mains_setup() -> None:
-    canvases = [tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black") for _ in range(5)]
-    name_labels = [tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:") for _ in range(5)]
-    main_names = [tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center", validate="key", validatecommand=(char15, "%P")) for _ in range(5)]
-    main_creates = [tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0) for _ in range(5)]
-    quick_number_buttons = [tk.Button(text=str(i+1), font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black") for i in range(5)]
+    canvases = [tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black") for _ in range(15)]
+    name_labels = [tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:") for _ in range(15)]
+    main_names = [tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center", validate="key", validatecommand=(char15, "%P")) for _ in range(15)]
+    main_creates = [tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0) for _ in range(15)]
+    quick_number_buttons = [tk.Button(text=str(i+1), font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black") for i in range(15)]
+    number_entry = tk.Entry(width=2, font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, justify="center", validate="key", validatecommand=(char2, "%P"))
+    or_label = tk.Label(font=("Helvetica", 24, "bold"), bd=0, highlightthickness=0, justify="center", bg="green", fg="black", text="or")
+    number_confirm = tk.Button(font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, justify="center", bg="green", fg="black", text="✅")
     for i in range(5):
         np_menu_items.append(quick_number_buttons[i])
+    np_menu_items.append(number_entry)
+    np_menu_items.append(number_confirm)
+    np_menu_items.append(or_label)
 
     main_items = []
     def how_many_mains() -> None:
         sounds.play_click()
         for i in range(5):
             quick_number_buttons[i].configure(command=lambda n=i+1 : build_mains(n))
-            quick_number_buttons[i].place(anchor=(str("e") if (i != 2) else str("center")), relx=0.5+((i-2)*0.019), rely=0.5)
+            quick_number_buttons[i].place(anchor="e", relx=0.424+((i-2)*0.019), rely=0.5)
+        or_label.place(anchor="center", relx=0.5, rely=0.5)
+        number_entry.place(anchor="w", relx=0.538, rely=0.5)
+        number_confirm.configure(command=lambda n=number_entry : build_many(n))
+        number_confirm.place(anchor="w", relx=0.56, rely=0.5)
     
+    def build_many(entry:tk.Entry) -> None:
+        num = int(entry.get())
+        if num <= 5:
+            build_mains(num)
+            return
+        elif num > 15:
+            messagebox.showerror("Too Many Mains", "Please enter a number between 1 and 15.")
+            return
+        
+        sounds.play_click()
+        plus.place_forget()
+        for i in range(5):
+            quick_number_buttons[i].place_forget()
+        number_entry.place_forget()
+        number_confirm.place_forget()
+        or_label.place_forget()
+        undo.place(anchor="nw", relx=0.0145*9, rely=0.002*16)
+        undo.tkraise()
+        np_menu_items.append(undo)
+        
+        YOFF = 0.05
+        YOFF2 = 0.17125
+        main_xs.append([0.5/6, (0.5+(5/4))/6, (0.5+2*(5/4))/6, (0.5+3*(5/4))/6, 5.5/6])
+        main_cys.append(0.5575); main_cys.append(0.72875); main_cys.append(0.9)
+        main_canvas_size.append(315)
+        main_canvas_size.append(195)
+
+        for i in range(num):
+            canvases[i].configure(width=main_canvas_size[0], height=main_canvas_size[1])
+            canvases[i].place(anchor="n", relx=main_xs[0][(i%5)], rely=0.4-YOFF+(int(i/5)*YOFF2))
+            canvases[i].create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
+            canvases[i].create_oval(7.5, 7.5, main_canvas_size[0]-15, main_canvas_size[1]-15, fill="#abcaf6", outline="white", width=2)
+            name_labels[i].place(anchor="s", relx=main_xs[0][(i%5)], rely=0.4475-YOFF+(int(i/5)*YOFF2))
+            main_names[i].place(anchor="s", relx=main_xs[0][(i%5)], rely=0.48-YOFF+(int(i/5)*YOFF2))
+            main_creates[i].configure(command=lambda p=gv.project, n=main_names[i], l=name_labels[i], c=main_creates[i] : create_new_main(p, n, l, c, main_xs[0][(i%5)]))
+            main_creates[i].place(anchor="s", relx=main_xs[0][(i%5)], rely=main_cys[0]-YOFF+(int(i/5)*YOFF2))
+            np_menu_items.append(canvases[i])
+            np_menu_items.append(name_labels[i])
+            np_menu_items.append(main_names[i])
+            np_menu_items.append(main_creates[i])
+            main_items.append(canvases[i])
+            main_items.append(name_labels[i])
+            main_items.append(main_names[i])
+            main_items.append(main_creates[i])
+        main_ct[0] = num
+
     def build_mains(num:int) -> None:
         sounds.play_click()
         plus.place_forget()
         for i in range(5):
             quick_number_buttons[i].place_forget()
+        number_entry.place_forget()
+        number_confirm.place_forget()
+        or_label.place_forget()
         undo.place(anchor="nw", relx=0.0145*9, rely=0.002*16)
         undo.tkraise()
         np_menu_items.append(undo)

@@ -1,1 +1,1 @@
-python3 C:\Users\Domth\Desktop\MyCode\FlowNote\flownote.py
+python3 C:\Users\Domth\Desktop\MyCode\FlowNote\main.py

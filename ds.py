@@ -2,7 +2,7 @@ from datetime import datetime, date
 import time
 
 class Main:
-    def __init__(self, parent, name:str, description="", time_sensitive=False, deadline="00/00/0000", notes="") -> None:
+    def __init__(self, parent, name:str, description="description", time_sensitive=False, deadline="00/00/0000", notes="notes") -> None:
         self.parent = parent
         self.name = name
         self.description = description
@@ -18,25 +18,10 @@ class Main:
         else:
             self.deadline = ""
 
-    def add_main(self, name:str, desc="", time_sensitive=False, deadline="00/00/0000", notes=""):
+    def add_main(self, name:str, desc="description", time_sensitive=False, deadline="00/00/0000", notes="notes"):
         new_main = Main(self, name, desc, time_sensitive, deadline, notes)
         self.mains.append(new_main)
         return new_main
-    
-    def edit_name(self, new_name:str) -> None:
-        self.name = new_name
-    
-    def edit_description(self, new_description:str) -> None:
-        self.description = new_description
-    
-    def edit_time_sensitivity(self, new_timesensitivity:bool) -> None:
-        self.time_sensitive = new_timesensitivity
-    
-    def edit_deadline(self, new_deadline:str) -> None:
-        self.deadline = new_deadline
-    
-    def edit_notes(self, new_notes:str) -> None:
-        self.notes = new_notes
 
     def date_after_current(date_to_complete:date) -> bool:
         if (date_to_complete - datetime.now().date()).days <= 0:
@@ -68,7 +53,7 @@ class Main:
         return f'(Name:"{self.name}", Description:"{self.description}", TimeSensitive:"{self.time_sensitive}", Deadline:"{self.deadline}", Notes:"{self.notes}", Mains:{self.mains})'
 
 class Project:
-    def __init__(self, name="", description="", time_sensitive=False, deadline="00/00/0000", notes="") -> None:
+    def __init__(self, name="", description="description", time_sensitive=False, deadline="00/00/0000", notes="notes") -> None:
         self.name = name
         self.description = description
         self.time_sensitive = time_sensitive
@@ -84,25 +69,10 @@ class Project:
         else:
             self.deadline = ""
 
-    def add_main(self, name:str, desc="", time_sensitive=False, deadline="00/00/0000", notes="") -> Main:
+    def add_main(self, name:str, desc="description", time_sensitive=False, deadline="00/00/0000", notes="notes") -> Main:
         new_main = Main(self, name, desc, time_sensitive, deadline, notes)
         self.mains.append(new_main)
         return new_main
-
-    def edit_name(self, new_name:str) -> None:
-        self.name = new_name
-
-    def edit_description(self, new_description:str) -> None:
-        self.description = new_description
-
-    def edit_time_sensitivity(self, new_timesensitivity:bool) -> None:
-        self.time_sensitive = new_timesensitivity
-
-    def edit_deadline(self, new_deadline:str) -> None:
-        self.deadline = new_deadline
-
-    def edit_notes(self, new_notes:str) -> None:
-        self.notes = new_notes
 
     def date_after_current(date_to_complete:date) -> bool:
         if (date_to_complete - datetime.now().date()).days <= 0:

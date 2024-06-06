@@ -210,38 +210,49 @@ def new_project_submit(name:tk.Entry, description:tk.Entry, time_sensitive:list,
     
     gv.project = ds.Project(name.get(), description.get(), time_sensitive[0], new_date, notes.get())
     projutil.save_project()
-
-    for widget in np_menu_items:
-        widget.place_forget()
     
+    project_setup(gv.project)
+    
+def project_setup(main):
+    for widget in np_menu_items:
+        try:
+            widget.place_forget()
+        except:
+            pass
+    np_menu_items.clear()
+
     canvas = tk.Canvas(gv.window, width=665, height=315, bd=0, highlightthickness=0, bg="black")
     canvas.place(anchor="n", relx=0.5, rely=0)
     canvas.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
     canvas.create_oval(7.5, 7.5, 650, 300, fill="#abcaf6", outline="white", width=3)
-    Lproject_name = tk.Label(text=gv.project.name, bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
-    if len(gv.project.name) <= 17:
-        Lproject_name.configure(font=("Helvetica", 50, "bold"))
-        Lproject_name.place(anchor="n", relx=0.5, rely=0.1175)
-    elif len(gv.project.name) <= 30:
-        Lproject_name.configure(font=("Helvetica", 32, "bold"))
-        Lproject_name.place(anchor="n", relx=0.5, rely=0.13125)
+    name = tk.Label(text=main.name, bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
+    if len(main.name) <= 17:
+        name.configure(font=("Helvetica", 50, "bold"))
+        name.place(anchor="n", relx=0.5, rely=0.1175)
+    elif len(main.name) <= 30:
+        name.configure(font=("Helvetica", 32, "bold"))
+        name.place(anchor="n", relx=0.5, rely=0.13125)
     
-    Lproject_desc = tk.Label(text=gv.project.description, font=("Helvetica", 14, "bold"), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
-    Lproject_desc.place(anchor="n", relx=0.5, rely=0.225)
-    Lproject_days_left = tk.Label(font=("Helvetica", 22, "bold"), bg="#abcaf6", fg="red", bd=0, highlightthickness=0)
-    Lproject_days_left.configure(text=f"{gv.project.calculate_days_left()}") 
-    Lproject_days_left.place(anchor="n", relx=0.5, rely=0.06875)
-    proj_edit = tk.Button(image=edit_large_image, bg="#abcaf6", bd=0, highlightthickness=0)
-    proj_edit.configure(command=lambda p=gv.project, pl=Lproject_name, dl=Lproject_desc, dy=Lproject_days_left : edit_interface(p, pl, dl, dy))
-    proj_edit.place(anchor="w", relx=0.356, rely=0.14583)
+    desc = tk.Label(text=main.description, font=("Helvetica", 14, "bold"), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
+    desc.place(anchor="n", relx=0.5, rely=0.225)
+    days = tk.Label(font=("Helvetica", 22, "bold"), bg="#abcaf6", fg="red", bd=0, highlightthickness=0)
+    days.configure(text=f"{main.calculate_days_left()}") 
+    days.place(anchor="n", relx=0.5, rely=0.06875)
+    edit = tk.Button(image=edit_large_image, bg="#abcaf6", bd=0, highlightthickness=0)
+    edit.configure(command=lambda p=main, pl=name, dl=desc, dy=days : edit_interface(p, pl, dl, dy))
+    edit.place(anchor="w", relx=0.356, rely=0.14583)
+    if main != gv.project:
+        backward_parent = tk.Button(text="↑", font=("Helvetica", 40, "bold"), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
+        backward_parent.configure(command=lambda m=main : back_parent(m))
+        backward_parent.place(anchor="n", relx=0.5, rely=0.005)
 
     np_menu_items.append(canvas)
-    np_menu_items.append(Lproject_name)
-    np_menu_items.append(Lproject_desc)
-    np_menu_items.append(Lproject_days_left)
-    np_menu_items.append(proj_edit)
-    mains_setup(gv.project)
-
+    np_menu_items.append(name)
+    np_menu_items.append(desc)
+    np_menu_items.append(days)
+    np_menu_items.append(edit)
+    np_menu_items.append(backward_parent)
+    mains_setup(main)
 
 def mains_setup(parent) -> None:
     canvases = [tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black") for _ in range(15)]
@@ -510,6 +521,7 @@ def edit_main(main, name_label:tk.Label, desc_label:tk.Label, days_label:tk.Labe
     if not projutil.edit_main(main, name_entry, desc_entry, time_var, mo_var, dy_var, yr_var, notes_entry):
         return None
     
+    projutil.save_project()
     name_label.configure(text=main.name)
     if desc_label != None and days_label != None:
         desc_label.configure(text=gv.project.description)
@@ -530,11 +542,11 @@ def back_from_edit() -> None:
         anim.proj_bg_vert()
 
 def forward_parent(main:ds.Main) -> None:
-    ...
+    project_setup(main)
 
 def back_parent(main:ds.Main) -> None:
     parent = main.parent
-
+    project_setup(parent)
 
 def init() -> None:
     cntue = tk.Button(text="▶", fg="black", bg="#e4eff6", bd=0, highlightthickness=0, font=("Helvetica", 16, "bold"), height=0)

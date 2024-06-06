@@ -231,15 +231,19 @@ def new_project_submit(name:tk.Entry, description:tk.Entry, time_sensitive:list,
     Lproject_days_left = tk.Label(font=("Helvetica", 22, "bold"), bg="#abcaf6", fg="red", bd=0, highlightthickness=0)
     Lproject_days_left.configure(text=f"{gv.project.calculate_days_left()}") 
     Lproject_days_left.place(anchor="n", relx=0.5, rely=0.06875)
+    proj_edit = tk.Button(image=edit_large_image, bg="#abcaf6", bd=0, highlightthickness=0)
+    proj_edit.configure(command=lambda p=gv.project, pl=Lproject_name, dl=Lproject_desc, dy=Lproject_days_left : edit_interface(p, pl, dl, dy))
+    proj_edit.place(anchor="w", relx=0.356, rely=0.14583)
 
     np_menu_items.append(canvas)
     np_menu_items.append(Lproject_name)
     np_menu_items.append(Lproject_desc)
     np_menu_items.append(Lproject_days_left)
-    mains_setup()
+    np_menu_items.append(proj_edit)
+    mains_setup(gv.project)
 
 
-def mains_setup() -> None:
+def mains_setup(parent) -> None:
     canvases = [tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black") for _ in range(15)]
     name_labels = [tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:") for _ in range(15)]
     main_names = [tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center", validate="key", validatecommand=(char15, "%P")) for _ in range(15)]
@@ -296,7 +300,7 @@ def mains_setup() -> None:
             canvases[i].create_oval(7.5, 7.5, main_canvas_size[0]-15, main_canvas_size[1]-15, fill="#abcaf6", outline="white", width=2)
             name_labels[i].place(anchor="s", relx=main_xs[0][(i%5)], rely=0.4475-YOFF+(int(i/5)*YOFF2))
             main_names[i].place(anchor="s", relx=main_xs[0][(i%5)], rely=0.48-YOFF+(int(i/5)*YOFF2))
-            main_creates[i].configure(command=lambda p=gv.project, n=main_names[i], l=name_labels[i], c=main_creates[i], x=main_xs[0][(i%5)], y=0.435+(int(i/5)*YOFF2) : setup_main(p, n, l, c, x, y))
+            main_creates[i].configure(command=lambda p=parent, n=main_names[i], l=name_labels[i], c=main_creates[i], x=main_xs[0][(i%5)], y=0.435+(int(i/5)*YOFF2) : setup_main(p, n, l, c, x, y))
             main_creates[i].place(anchor="s", relx=main_xs[0][(i%5)], rely=main_cys[0]-YOFF+(int(i/5)*YOFF2))
             np_menu_items.append(canvases[i])
             np_menu_items.append(name_labels[i])
@@ -352,7 +356,7 @@ def mains_setup() -> None:
             canvases[i].create_oval(7.5, 7.5, main_canvas_size[0]-15, main_canvas_size[1]-15, fill="#abcaf6", outline="white", width=2)
             name_labels[i].place(anchor="s", relx=main_xs[0][i], rely=0.4475-YOFF)
             main_names[i].place(anchor="s", relx=main_xs[0][i], rely=0.48-YOFF)
-            main_creates[i].configure(command=lambda p=gv.project, n=main_names[i], l=name_labels[i], c=main_creates[i], x=main_xs[0][i], y=0.435 : setup_main(p, n, l, c, x, y))
+            main_creates[i].configure(command=lambda p=parent, n=main_names[i], l=name_labels[i], c=main_creates[i], x=main_xs[0][i], y=0.435 : setup_main(p, n, l, c, x, y))
             main_creates[i].place(anchor="s", relx=main_xs[0][i], rely=main_cys[0]-YOFF)
             np_menu_items.append(canvases[i])
             np_menu_items.append(name_labels[i])
@@ -384,19 +388,24 @@ def setup_main(parent, name:tk.Entry, label:tk.Label, create:tk.Button, relx:flo
     main_name_label = tk.Label(font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text=new_main.name)
     main_name_label.place(anchor="center", relx=relx, rely=rely)
     main_center = tk.Button(image=center_image, bg="#abcaf6", bd=0, highlightthickness=0)
+    main_center.configure(command=lambda m=new_main : forward_parent(m))
     main_center.place(anchor="center", relx=relx+0.05, rely=rely)
     main_edit = tk.Button(image=edit_image, bg="#abcaf6", bd=0, highlightthickness=0)
-    main_edit.configure(command=lambda m=new_main, ml=main_name_label : edit_interface(m, ml))
+    main_edit.configure(command=lambda m=new_main, ml=main_name_label : edit_interface(m, ml, None, None))
     main_edit.place(anchor="center", relx=relx-0.0575, rely=rely)
     np_menu_items.append(main_name_label)
     np_menu_items.append(main_center)
     np_menu_items.append(main_edit)
 
-def edit_interface(main, main_label:tk.Label) -> None:
+def edit_interface(main, name_label:tk.Label, desc_label:tk.Label, days_label:tk.Label) -> None:
     try: 
         gv.window.after_cancel(gv.star_loop[0])
     except: 
         pass
+
+    if main != gv.project:
+        desc_label = None
+        days_label = None
 
     for star in gv.stars:
         star[0].destroy()
@@ -405,10 +414,9 @@ def edit_interface(main, main_label:tk.Label) -> None:
     month_var.set("")
     day_var.set("")
     year_var.set("")
-    time_var.set(0)
+    time_var.set(2)
 
     def time_sensitive_true(a:tk.Button, b:tk.Button) -> None:
-        sounds.play_click()
         time_var.set(1)
         a.configure(relief="sunken")
         b.configure(relief="raised")
@@ -416,7 +424,6 @@ def edit_interface(main, main_label:tk.Label) -> None:
         day_entry.place(relx=0.85, rely=4/6, anchor="center")
         year_entry.place(relx=0.95, rely=4/6, anchor="e")
     def time_sensitive_false(a:tk.Button, b:tk.Button) -> None:
-        sounds.play_click()
         time_var.set(0)
         a.configure(relief="raised")
         b.configure(relief="sunken")
@@ -451,16 +458,16 @@ def edit_interface(main, main_label:tk.Label) -> None:
     old_name = tk.Label(frame, text=main.name, bg="black", fg="white", font=("Times New Roman", 60, "bold"))
     old_name.place(relx=0.25, rely=1/6, anchor="w")
     edit_menu_items.append(old_name)
-    old_desc = tk.Label(frame, text=main.description, bg="black", fg="white", font=("Times New Roman", 60, "bold"))
+    old_desc = tk.Label(frame, text=(main.description if main.description != "" else "description:"), bg="black", fg="white", font=("Times New Roman", 60, "bold"))
     old_desc.place(relx=0.25, rely=2/6, anchor="w")
     edit_menu_items.append(old_desc)
-    old_time = tk.Label(frame, text=("Time Sensitive" if main.time_sensitive else "Not Time Sensitive"), bg="black", fg="white", font=("Times New Roman", 60, "bold"))
+    old_time = tk.Label(frame, text="Is this Time Sensitive?", bg="black", fg="white", font=("Times New Roman", 50, "bold"))
     old_time.place(relx=0.25, rely=3/6, anchor="w")
     edit_menu_items.append(old_time)
-    old_dead = tk.Label(frame, text=(main.deadline if main.deadline != "" else "deadline"), bg="black", fg="white", font=("Times New Roman", 60, "bold"))
+    old_dead = tk.Label(frame, text=(main.deadline if main.deadline != "" else "deadline:"), bg="black", fg="white", font=("Times New Roman", 60, "bold"))
     old_dead.place(relx=0.25, rely=4/6, anchor="w")
     edit_menu_items.append(old_dead)
-    old_notes = tk.Label(frame, text=main.notes, bg="black", fg="white", font=("Times New Roman", 60, "bold"))
+    old_notes = tk.Label(frame, text=(main.notes if main.notes != "" else "notes:"), bg="black", fg="white", font=("Times New Roman", 60, "bold"))
     old_notes.place(relx=0.25, rely=5/6, anchor="w")
     edit_menu_items.append(old_notes)
 
@@ -474,8 +481,8 @@ def edit_interface(main, main_label:tk.Label) -> None:
     notes_entry.place(relx=0.95, rely=5/6, anchor="e")
     edit_menu_items.append(notes_entry)
 
-    time_y = tk.Button(frame, bg="green", fg="white", font=("Times New Roman", 30, "bold"), width=3, text="Yes")
-    time_n = tk.Button(frame, bg="red", fg="white", font=("Times New Roman", 30, "bold"), width=3, text="No")
+    time_y = tk.Button(frame, bg="green", fg="black", font=("Times New Roman", 30, "bold"), width=5, text="Yes")
+    time_n = tk.Button(frame, bg="red", fg="black", font=("Times New Roman", 30, "bold"), width=5, text="No")
     time_y.configure(command=lambda y=time_y, n=time_n : time_sensitive_true(y, n))
     time_n.configure(command=lambda y=time_y, n=time_n : time_sensitive_false(y, n))
     time_y.place(relx=0.75, rely=3/6, anchor="w")
@@ -485,27 +492,29 @@ def edit_interface(main, main_label:tk.Label) -> None:
 
     years = [str(datetime.today().year+i) for i in range(11)]
     month_entry = tk.OptionMenu(frame, month_var,"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
-    month_entry.place(relx=0.75, rely=4/6, anchor="w")
     edit_menu_items.append(month_entry)
     day_entry = tk.OptionMenu(frame, day_var,  '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th', '13th', '14th', '15th', '16th', '17th', '18th', '19th', '20th', '21st', '22nd', '23rd', '24th', '25th', '26th', '27th', '28th', '29th', '30th', '31st')
-    day_entry.place(relx=0.85, rely=4/6, anchor="center")
     edit_menu_items.append(day_entry)
     year_entry = tk.OptionMenu(frame, year_var, *years)
-    year_entry.place(relx=0.95, rely=4/6, anchor="e")
     edit_menu_items.append(year_entry)
 
     edit_large = tk.Button(frame, image=edit_large_image, bd=0, bg="black")
-    edit_large.configure(command=lambda m=main, ml=main_label, nae=name_entry, de=desc_entry, tv=time_var, mv=month_var, dv=day_var, yv=year_var, ne=notes_entry : edit_main(m, ml, nae, de, tv, mv, dv, yv, ne))
+    edit_large.configure(command=lambda m=main, ml=name_label, dl=desc_label, dy=days_label, nae=name_entry, de=desc_entry, tv=time_var, mv=month_var, dv=day_var, yv=year_var, ne=notes_entry : edit_main(m, ml, dl, dy, nae, de, tv, mv, dv, yv, ne))
     edit_large.place(relx=0.125, rely=0.5, anchor="s")
     edit_menu_items.append(edit_large)
     edit_label = tk.Label(frame, text="Edit Main", justify="center", font=("Times New Roman", 35, "bold"), bg="black", fg="white")
     edit_label.place(relx=0.125, rely=0.5, anchor="n")
     edit_menu_items.append(edit_label)
 
-def edit_main(main, main_label:tk.Label, name_entry:tk.Entry, desc_entry:tk.Entry, time_var:tk.IntVar, mo_var:tk.StringVar, dy_var:tk.StringVar, yr_var:tk.StringVar, notes_entry:tk.Entry) -> None:
+def edit_main(main, name_label:tk.Label, desc_label:tk.Label, days_label:tk.Label, name_entry:tk.Entry, desc_entry:tk.Entry, time_var:tk.IntVar, mo_var:tk.StringVar, dy_var:tk.StringVar, yr_var:tk.StringVar, notes_entry:tk.Entry) -> None:
     if not projutil.edit_main(main, name_entry, desc_entry, time_var, mo_var, dy_var, yr_var, notes_entry):
         return None
-    main_label.configure(text=main.name)
+    
+    name_label.configure(text=main.name)
+    if desc_label != None and days_label != None:
+        desc_label.configure(text=gv.project.description)
+        days_label.configure(text=f"{gv.project.calculate_days_left()}")
+
     back_from_edit()
 
 def back_from_edit() -> None:
@@ -520,9 +529,11 @@ def back_from_edit() -> None:
     else:
         anim.proj_bg_vert()
 
-def old_project_screen() -> None:
-    #Create UI for saved projects screen by accessing User Projects folder
-    pass
+def forward_parent(main:ds.Main) -> None:
+    ...
+
+def back_parent(main:ds.Main) -> None:
+    parent = main.parent
 
 
 def init() -> None:

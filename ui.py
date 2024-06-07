@@ -26,6 +26,7 @@ char30 = gv.window.register((lambda text: (True if len(text) <= 30 else False)))
 char100 = gv.window.register((lambda text: (True if len(text) <= 100 else False)))
 
 center_image = tk.PhotoImage(file=constants.CENTERSMALL_ICON)
+delete_image = tk.PhotoImage(file=constants.DELETE_ICON)
 edit_image = tk.PhotoImage(file=constants.EDIT_ICON)
 edit_large_image = tk.PhotoImage(file=constants.EDITLARGE_ICON)
 transparent_image = Image.open(constants.ACTUALLY_TRANSPARENT_ICON)
@@ -307,7 +308,7 @@ def mains_setup(parent) -> None:
             canvases[i].create_oval(7.5, 7.5, main_canvas_size[0]-15, main_canvas_size[1]-15, fill="#abcaf6", outline="white", width=2)
             name_labels[i].place(anchor="s", relx=main_xs[0][(i%5)], rely=0.4475-YOFF+(int(i/5)*YOFF2))
             main_names[i].place(anchor="s", relx=main_xs[0][(i%5)], rely=0.48-YOFF+(int(i/5)*YOFF2))
-            main_creates[i].configure(command=lambda p=parent, n=main_names[i], l=name_labels[i], c=main_creates[i], x=main_xs[0][(i%5)], y=0.435+(int(i/5)*YOFF2) : setup_main(p, n, l, c, x, y))
+            main_creates[i].configure(command=lambda p=parent, n=main_names[i], l=name_labels[i], c=main_creates[i], ca=canvases[i], x=main_xs[0][(i%5)], y=0.435+(int(i/5)*YOFF2) : setup_main(p, n, l, c, ca, x, y))
             main_creates[i].place(anchor="s", relx=main_xs[0][(i%5)], rely=main_cys[0]-YOFF+(int(i/5)*YOFF2))
             np_menu_items.append(canvases[i])
             np_menu_items.append(name_labels[i])
@@ -319,7 +320,7 @@ def mains_setup(parent) -> None:
     plus.place(anchor="w", relx=0.45, rely=0.3375)
     np_menu_items.append(plus)
 
-def setup_main(parent, name:tk.Entry, label:tk.Label, create:tk.Button, relx:float, rely:float) -> None:
+def setup_main(parent, name:tk.Entry, label:tk.Label, create:tk.Button, canvas:tk.Canvas, relx:float, rely:float) -> None:
     if name.get() == "":
         messagebox.showerror("No Main Name", "Please enter a project name.")
         return None
@@ -331,9 +332,11 @@ def setup_main(parent, name:tk.Entry, label:tk.Label, create:tk.Button, relx:flo
     name.destroy()
     label.destroy()
     create.destroy()
-    child_ui(new_main, relx, rely)
+    child_ui(new_main, canvas, relx, rely)
 
-def child_ui(new_main, relx:float, rely:float):
+def child_ui(new_main, canvas:tk.Canvas, relx:float, rely:float):
+    del_items = []
+
     main_name_label = tk.Label(font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text=new_main.name)
     main_name_label.place(anchor="center", relx=relx, rely=rely)
     main_center = tk.Button(image=center_image, bg="#abcaf6", bd=0, highlightthickness=0)
@@ -342,9 +345,14 @@ def child_ui(new_main, relx:float, rely:float):
     main_edit = tk.Button(image=edit_image, bg="#abcaf6", bd=0, highlightthickness=0)
     main_edit.configure(command=lambda m=new_main, ml=main_name_label : edit_interface(m, ml, None, None))
     main_edit.place(anchor="center", relx=relx-0.0575, rely=rely)
-    np_menu_items.append(main_name_label)
-    np_menu_items.append(main_center)
-    np_menu_items.append(main_edit)
+    main_delete = tk.Button(image=delete_image, bg="#abcaf6", bd=0, highlightthickness=0)
+    main_delete.place(anchor="center", relx=relx+0.0575, rely=rely)
+    del_items.append(canvas)
+    np_menu_items.append(main_name_label); del_items.append(main_name_label)
+    np_menu_items.append(main_center); del_items.append(main_center)
+    np_menu_items.append(main_edit); del_items.append(main_edit)
+    np_menu_items.append(main_delete); del_items.append(main_delete)
+    main_delete.configure(command=lambda p=new_main.parent, n=new_main.name, i=del_items : delete_main(p, n, i))
 
 def edit_interface(main, name_label:tk.Label, desc_label:tk.Label, days_label:tk.Label) -> None:
     try: 
@@ -478,6 +486,20 @@ def back_from_edit() -> None:
         anim.proj_bg_hor()
     else:
         anim.proj_bg_vert()
+
+def delete_main(parent, main_name:str, del_items:list) -> None:
+    for main in parent.mains:
+        if main.name == main_name:
+            parent.mains.remove(main)
+            break
+    
+    for item in del_items:
+        try:
+            item.place_forget()
+        except:
+            pass
+    
+    projutil.save_project()
 
 def forward_parent(main:ds.Main) -> None:
     project_setup(main)

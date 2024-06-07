@@ -38,7 +38,6 @@ sky_mini_photo = ImageTk.PhotoImage(sky_mini)
 sky_label = tk.Label(gv.window, image=sky_photo)
 sky_label.image = sky_photo
 back = tk.Button()
-main_ct = [0]
 main_canvas_size = []
 main_canvas_north_y = [0]
 main_xs = []
@@ -241,10 +240,10 @@ def project_setup(main):
     edit = tk.Button(image=edit_large_image, bg="#abcaf6", bd=0, highlightthickness=0)
     edit.configure(command=lambda p=main, pl=name, dl=desc, dy=days : edit_interface(p, pl, dl, dy))
     edit.place(anchor="w", relx=0.356, rely=0.14583)
+    backward_parent = tk.Button(text="↑", font=("Helvetica", 40, "bold"), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
     if main != gv.project:
-        backward_parent = tk.Button(text="↑", font=("Helvetica", 40, "bold"), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
         backward_parent.configure(command=lambda m=main : back_parent(m))
-        backward_parent.place(anchor="n", relx=0.5, rely=0.005)
+        backward_parent.place(anchor="n", relx=0.5, rely=0.0125)
 
     np_menu_items.append(canvas)
     np_menu_items.append(name)
@@ -255,56 +254,53 @@ def project_setup(main):
     mains_setup(main)
 
 def mains_setup(parent) -> None:
+    num_mains = len(parent.mains)
+
     canvases = [tk.Canvas(gv.window, bd=0, highlightthickness=0, bg="black") for _ in range(15)]
     name_labels = [tk.Label(font=("Helvetica", 18, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text="Name:") for _ in range(15)]
     main_names = [tk.Entry(font=("Helvetica", 18), bd=0, highlightthickness=0, justify="center", validate="key", validatecommand=(char15, "%P")) for _ in range(15)]
     main_creates = [tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0) for _ in range(15)]
-    quick_number_buttons = [tk.Button(text=str(i+1), font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="green", fg="black") for i in range(15)]
-    number_entry = tk.Entry(width=2, font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, justify="center", validate="key", validatecommand=(char2, "%P"))
-    or_label = tk.Label(font=("Helvetica", 24, "bold"), bd=0, highlightthickness=0, justify="center", bg="green", fg="black", text="or")
+    number_entry = tk.Entry(width=3, font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, justify="center", validate="key", validatecommand=(char2, "%P"))
     number_confirm = tk.Button(font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, justify="center", bg="green", fg="black", text="✅")
-    for i in range(5):
-        np_menu_items.append(quick_number_buttons[i])
     np_menu_items.append(number_entry)
     np_menu_items.append(number_confirm)
-    np_menu_items.append(or_label)
 
-    main_items = []
+    YOFF = 0.05
+    YOFF2 = 0.17125
+    for i in range(num_mains):
+        canvases[i].configure(width=main_canvas_size[0], height=main_canvas_size[1])
+        canvases[i].place(anchor="n", relx=main_xs[0][(i%5)], rely=0.4-YOFF+(int(i/5)*YOFF2))
+        canvases[i].create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
+        canvases[i].create_oval(7.5, 7.5, main_canvas_size[0]-15, main_canvas_size[1]-15, fill="#abcaf6", outline="white", width=2)
+        np_menu_items.append(canvases[i])
+        child_ui(parent.mains[i], main_xs[0][(i%5)], 0.435+(int(i/5)*YOFF2))
+
     def how_many_mains() -> None:
         sounds.play_click()
-        for i in range(5):
-            quick_number_buttons[i].configure(command=lambda n=i+1 : build_mains(n))
-            quick_number_buttons[i].place(anchor="e", relx=0.424+((i-2)*0.019), rely=0.5)
-        or_label.place(anchor="center", relx=0.5, rely=0.5)
-        number_entry.place(anchor="w", relx=0.538, rely=0.5)
-        number_confirm.configure(command=lambda n=number_entry : build_many(n))
-        number_confirm.place(anchor="w", relx=0.56, rely=0.5)
+        number_entry.place(anchor="center", relx=0.5, rely=0.3375)
+        number_confirm.configure(command=lambda e=number_entry : build_mains(e))
+        number_confirm.place(anchor="e", relx=0.55, rely=0.3375)
     
-    def build_many(entry:tk.Entry) -> None:
+    def build_mains(entry:tk.Entry) -> None:
+        num_mains = len(parent.mains)
         num = int(entry.get())
-        if num <= 5:
-            build_mains(num)
-            return
-        elif num > 15:
-            messagebox.showerror("Too Many Mains", "Please enter a number between 1 and 15.")
+        if num+num_mains > 15:
+            messagebox.showerror("Too Many Mains", "Maximum number of mains was entered or exceeded.")
             return
         
         sounds.play_click()
-        plus.place_forget()
-        for i in range(5):
-            quick_number_buttons[i].place_forget()
+        number_entry.delete(0, tk.END)
         number_entry.place_forget()
         number_confirm.place_forget()
-        or_label.place_forget()
         
-        YOFF = 0.05
-        YOFF2 = 0.17125
-        main_xs.append([0.5/6, (0.5+(5/4))/6, (0.5+2*(5/4))/6, (0.5+3*(5/4))/6, 5.5/6])
+        main_xs.append([1/12, 7/24, 0.5, 17/24, 11/12])
         main_cys.append(0.5575); main_cys.append(0.72875); main_cys.append(0.9)
         main_canvas_size.append(315)
         main_canvas_size.append(195)
 
-        for i in range(num):
+        for i in range(num+num_mains):
+            if i <= num_mains-1 and num_mains != 0:
+                continue
             canvases[i].configure(width=main_canvas_size[0], height=main_canvas_size[1])
             canvases[i].place(anchor="n", relx=main_xs[0][(i%5)], rely=0.4-YOFF+(int(i/5)*YOFF2))
             canvases[i].create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
@@ -317,74 +313,13 @@ def mains_setup(parent) -> None:
             np_menu_items.append(name_labels[i])
             np_menu_items.append(main_names[i])
             np_menu_items.append(main_creates[i])
-            main_items.append(canvases[i])
-            main_items.append(name_labels[i])
-            main_items.append(main_names[i])
-            main_items.append(main_creates[i])
-        main_ct[0] = num
-
-    def build_mains(num:int) -> None:
-        sounds.play_click()
-        plus.place_forget()
-        for i in range(5):
-            quick_number_buttons[i].place_forget()
-        number_entry.place_forget()
-        number_confirm.place_forget()
-        or_label.place_forget()
-        YOFF = 0.05
-        main_canvas_north_y[0] = 0.35
-
-        if num == 1:
-            main_xs.append([0.5])
-            main_cys.append(0.6125)
-            main_canvas_size.append(415)
-            main_canvas_size.append(255)
-        elif num == 2:
-            main_xs.append([1/3, 2/3])
-            main_cys.append(0.6125)
-            main_canvas_size.append(415)
-            main_canvas_size.append(255)
-        elif num == 3:
-            main_xs.append([1/4, 2/4, 3/4])
-            main_cys.append(0.6125)
-            main_canvas_size.append(415)
-            main_canvas_size.append(255)
-        elif num == 4:
-            main_xs.append([0.75/5, (0.75+(3.5/3))/5, (0.75+2*(3.5/3))/5, 4.25/5])
-            main_cys.append(0.5875)
-            main_canvas_size.append(365)
-            main_canvas_size.append(225)
-        elif num == 5:
-            main_xs.append([0.5/6, (0.5+(5/4))/6, (0.5+2*(5/4))/6, (0.5+3*(5/4))/6, 5.5/6])
-            main_cys.append(0.5575)
-            main_canvas_size.append(315)
-            main_canvas_size.append(195)
-    
-        for i in range(num):
-            canvases[i].configure(width=main_canvas_size[0], height=main_canvas_size[1])
-            canvases[i].place(anchor="n", relx=main_xs[0][i], rely=0.35)
-            canvases[i].create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvases[i].create_oval(7.5, 7.5, main_canvas_size[0]-15, main_canvas_size[1]-15, fill="#abcaf6", outline="white", width=2)
-            name_labels[i].place(anchor="s", relx=main_xs[0][i], rely=0.4475-YOFF)
-            main_names[i].place(anchor="s", relx=main_xs[0][i], rely=0.48-YOFF)
-            main_creates[i].configure(command=lambda p=parent, n=main_names[i], l=name_labels[i], c=main_creates[i], x=main_xs[0][i], y=0.435 : setup_main(p, n, l, c, x, y))
-            main_creates[i].place(anchor="s", relx=main_xs[0][i], rely=main_cys[0]-YOFF)
-            np_menu_items.append(canvases[i])
-            np_menu_items.append(name_labels[i])
-            np_menu_items.append(main_names[i])
-            np_menu_items.append(main_creates[i])
-            main_items.append(canvases[i])
-            main_items.append(name_labels[i])
-            main_items.append(main_names[i])
-            main_items.append(main_creates[i])
-        main_ct[0] = num
 
     plus = tk.Button(text="➕", font=("Helvetica", 16, "bold"), bd=0, highlightthickness=0, bg="black", fg="white")
     plus.configure(command=how_many_mains)
-    plus.place(anchor="n", relx=0.5, rely=0.4)
+    plus.place(anchor="w", relx=0.45, rely=0.3375)
     np_menu_items.append(plus)
 
-def setup_main(parent, name:tk.Entry, label:tk.Label, create:tk.Button, relx:float, rely=float) -> None:
+def setup_main(parent, name:tk.Entry, label:tk.Label, create:tk.Button, relx:float, rely:float) -> None:
     if name.get() == "":
         messagebox.showerror("No Main Name", "Please enter a project name.")
         return None
@@ -396,11 +331,14 @@ def setup_main(parent, name:tk.Entry, label:tk.Label, create:tk.Button, relx:flo
     name.destroy()
     label.destroy()
     create.destroy()
+    child_ui(new_main, relx, rely)
+
+def child_ui(new_main, relx:float, rely:float):
     main_name_label = tk.Label(font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, bg="#abcaf6", justify="center", text=new_main.name)
     main_name_label.place(anchor="center", relx=relx, rely=rely)
     main_center = tk.Button(image=center_image, bg="#abcaf6", bd=0, highlightthickness=0)
     main_center.configure(command=lambda m=new_main : forward_parent(m))
-    main_center.place(anchor="center", relx=relx+0.05, rely=rely)
+    main_center.place(anchor="center", relx=relx, rely=rely-0.04)
     main_edit = tk.Button(image=edit_image, bg="#abcaf6", bd=0, highlightthickness=0)
     main_edit.configure(command=lambda m=new_main, ml=main_name_label : edit_interface(m, ml, None, None))
     main_edit.place(anchor="center", relx=relx-0.0575, rely=rely)

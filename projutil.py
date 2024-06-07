@@ -77,7 +77,7 @@ def save_project() -> None:
     file_dir = constants.USER_PROJECTS_PATH + rf"\{gv.project.name}.json"
 
     data = {
-        gv.project.name : gv.project.as_dict()
+        "projectdata" : gv.project.as_dict()
     }
 
     try:

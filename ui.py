@@ -1,6 +1,6 @@
 from PIL import ImageTk, Image, ImageGrab, ImageFilter
+from tkinter import messagebox, filedialog
 from datetime import datetime, date
-from tkinter import messagebox
 import globalvariables as gv
 import animations as anim
 import tkinter as tk
@@ -29,6 +29,8 @@ center_image = tk.PhotoImage(file=constants.CENTERSMALL_ICON)
 delete_image = tk.PhotoImage(file=constants.DELETE_ICON)
 edit_image = tk.PhotoImage(file=constants.EDIT_ICON)
 edit_large_image = tk.PhotoImage(file=constants.EDITLARGE_ICON)
+info_image = tk.PhotoImage(file=constants.INFO_ICON)
+info_large_image = tk.PhotoImage(file=constants.INFOLARGE_ICON)
 transparent_image = Image.open(constants.ACTUALLY_TRANSPARENT_ICON)
 transparent_photo = ImageTk.PhotoImage(transparent_image)
 sky = Image.open(constants.SKY_ICON)
@@ -39,13 +41,12 @@ sky_mini_photo = ImageTk.PhotoImage(sky_mini)
 sky_label = tk.Label(gv.window, image=sky_photo)
 sky_label.image = sky_photo
 back = tk.Button()
-main_canvas_size = []
 main_canvas_north_y = [0]
-main_xs = []
-main_cys = []
+main_xs = [1/12, 7/24, 0.5, 17/24, 11/12]
 
 np_menu_items = []
 edit_menu_items = []
+info_menu_items = []
 
 time_var = tk.IntVar(); time_var.set(0)
 month_var = tk.StringVar(); month_var.set("")
@@ -86,8 +87,38 @@ def project_select_screen() -> None:
     back.place(relx=0.02, rely=0.02, anchor="nw")
     gv.logo_label.pack()
     new_project_button.configure(command=lambda b=back : new_project_screen(b))
+    old_project_button.configure(command=lambda b=back : choose_project(b))
     new_project_button.place(relx=0.5, rely=1/3, anchor="center")
     old_project_button.place(relx=0.5, rely=2/3, anchor="center")
+
+def choose_project(back:tk.Button) -> None:
+    projutil.update_existing_names()
+    if len(gv.existing_names) == 0:
+        messagebox.showerror("Error", "No projects found")
+        return
+    
+    file_path = filedialog.askopenfilename(
+        initialdir=rf"{constants.USER_PROJECTS_PATH}",
+        title="Select a project json file",
+        filetypes=(("JSON files", "*.json"), ("All files", "*.*"))
+    )
+    if file_path:
+        projutil.load_project(file_path)
+        gv.window.attributes("-fullscreen", True)
+        gv.logo_label.pack_forget()
+        new_project_button.place_forget()
+        old_project_button.place_forget()
+        sky_label.pack()
+        choices = [0, 1]
+        choice = rr.choice(choices)
+        if choice == 0:
+            anim.proj_bg_hor()
+        else:
+            anim.proj_bg_vert()
+        back.configure(command=project_select_screen, text="← Main Menu", font=("Helvetica", 20, "bold"), bg="black", fg="white", relief="raised")
+        back.place(relx=0.002*9, rely=0.002*16, anchor="nw")
+        back.tkraise()
+        project_setup(gv.project)
 
 def new_project_screen(back:tk.Button) -> None:
     sounds.play_click()
@@ -233,24 +264,28 @@ def project_setup(main):
         name.configure(font=("Helvetica", 32, "bold"))
         name.place(anchor="n", relx=0.5, rely=0.13125)
     
-    desc = tk.Label(text=main.description, font=("Helvetica", 14, "bold"), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
+    desc = tk.Label(text=main.description[:31], font=("Helvetica", 14, "bold"), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
     desc.place(anchor="n", relx=0.5, rely=0.225)
     days = tk.Label(font=("Helvetica", 22, "bold"), bg="#abcaf6", fg="red", bd=0, highlightthickness=0)
-    days.configure(text=f"{main.calculate_days_left()}") 
+    days.configure(text=f"{main.calculate_days_left()}")
     days.place(anchor="n", relx=0.5, rely=0.06875)
-    edit = tk.Button(image=edit_large_image, bg="#abcaf6", bd=0, highlightthickness=0)
+    edit = tk.Button(image=edit_image, bg="#abcaf6", bd=0, highlightthickness=0)
     edit.configure(command=lambda p=main, pl=name, dl=desc, dy=days : edit_interface(p, pl, dl, dy))
-    edit.place(anchor="w", relx=0.356, rely=0.14583)
+    edit.place(anchor="w", relx=0.356, rely=0.1175)
+    info = tk.Button(image=info_image, bg="#abcaf6", bd=0, highlightthickness=0)
+    info.configure(command=lambda m=main : info_interface(m))
+    info.place(anchor="w", relx=0.356, rely=0.17)
     backward_parent = tk.Button(text="↑", font=("Helvetica", 40, "bold"), bg="#abcaf6", fg="black", bd=0, highlightthickness=0)
     if main != gv.project:
         backward_parent.configure(command=lambda m=main : back_parent(m))
-        backward_parent.place(anchor="n", relx=0.5, rely=0.0125)
+        backward_parent.place(anchor="e", relx=0.644, rely=((0.13125+0.1175)/2))
 
     np_menu_items.append(canvas)
     np_menu_items.append(name)
     np_menu_items.append(desc)
     np_menu_items.append(days)
     np_menu_items.append(edit)
+    np_menu_items.append(info)
     np_menu_items.append(backward_parent)
     mains_setup(main)
 
@@ -269,12 +304,12 @@ def mains_setup(parent) -> None:
     YOFF = 0.05
     YOFF2 = 0.17125
     for i in range(num_mains):
-        canvases[i].configure(width=main_canvas_size[0], height=main_canvas_size[1])
-        canvases[i].place(anchor="n", relx=main_xs[0][(i%5)], rely=0.4-YOFF+(int(i/5)*YOFF2))
+        canvases[i].configure(width=315, height=195)
+        canvases[i].place(anchor="n", relx=main_xs[(i%5)], rely=0.4-YOFF+(int(i/5)*YOFF2))
         canvases[i].create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-        canvases[i].create_oval(7.5, 7.5, main_canvas_size[0]-15, main_canvas_size[1]-15, fill="#abcaf6", outline="white", width=2)
+        canvases[i].create_oval(7.5, 7.5, 300, 180, fill="#abcaf6", outline="white", width=2)
         np_menu_items.append(canvases[i])
-        child_ui(parent.mains[i], main_xs[0][(i%5)], 0.435+(int(i/5)*YOFF2))
+        child_ui(parent.mains[i], canvases[i], main_xs[(i%5)], 0.435+(int(i/5)*YOFF2))
 
     def how_many_mains() -> None:
         sounds.play_click()
@@ -294,22 +329,17 @@ def mains_setup(parent) -> None:
         number_entry.place_forget()
         number_confirm.place_forget()
         
-        main_xs.append([1/12, 7/24, 0.5, 17/24, 11/12])
-        main_cys.append(0.5575); main_cys.append(0.72875); main_cys.append(0.9)
-        main_canvas_size.append(315)
-        main_canvas_size.append(195)
-
         for i in range(num+num_mains):
             if i <= num_mains-1 and num_mains != 0:
                 continue
-            canvases[i].configure(width=main_canvas_size[0], height=main_canvas_size[1])
-            canvases[i].place(anchor="n", relx=main_xs[0][(i%5)], rely=0.4-YOFF+(int(i/5)*YOFF2))
+            canvases[i].configure(width=315, height=195)
+            canvases[i].place(anchor="n", relx=main_xs[(i%5)], rely=0.4-YOFF+(int(i/5)*YOFF2))
             canvases[i].create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
-            canvases[i].create_oval(7.5, 7.5, main_canvas_size[0]-15, main_canvas_size[1]-15, fill="#abcaf6", outline="white", width=2)
-            name_labels[i].place(anchor="s", relx=main_xs[0][(i%5)], rely=0.4475-YOFF+(int(i/5)*YOFF2))
-            main_names[i].place(anchor="s", relx=main_xs[0][(i%5)], rely=0.48-YOFF+(int(i/5)*YOFF2))
-            main_creates[i].configure(command=lambda p=parent, n=main_names[i], l=name_labels[i], c=main_creates[i], ca=canvases[i], x=main_xs[0][(i%5)], y=0.435+(int(i/5)*YOFF2) : setup_main(p, n, l, c, ca, x, y))
-            main_creates[i].place(anchor="s", relx=main_xs[0][(i%5)], rely=main_cys[0]-YOFF+(int(i/5)*YOFF2))
+            canvases[i].create_oval(7.5, 7.5, 300, 180, fill="#abcaf6", outline="white", width=2)
+            name_labels[i].place(anchor="s", relx=main_xs[(i%5)], rely=0.4475-YOFF+(int(i/5)*YOFF2))
+            main_names[i].place(anchor="s", relx=main_xs[(i%5)], rely=0.48-YOFF+(int(i/5)*YOFF2))
+            main_creates[i].configure(command=lambda p=parent, n=main_names[i], l=name_labels[i], c=main_creates[i], ca=canvases[i], x=main_xs[(i%5)], y=0.435+(int(i/5)*YOFF2) : setup_main(p, n, l, c, ca, x, y))
+            main_creates[i].place(anchor="s", relx=main_xs[(i%5)], rely=0.5575-YOFF+(int(i/5)*YOFF2))
             np_menu_items.append(canvases[i])
             np_menu_items.append(name_labels[i])
             np_menu_items.append(main_names[i])
@@ -347,11 +377,16 @@ def child_ui(new_main, canvas:tk.Canvas, relx:float, rely:float):
     main_edit.place(anchor="center", relx=relx-0.0575, rely=rely)
     main_delete = tk.Button(image=delete_image, bg="#abcaf6", bd=0, highlightthickness=0)
     main_delete.place(anchor="center", relx=relx+0.0575, rely=rely)
+    main_info = tk.Button(image=info_image, bg="#abcaf6", bd=0, highlightthickness=0)
+    main_info.configure(command=lambda m=new_main : info_interface(m))
+    main_info.place(anchor="center", relx=relx, rely=rely+0.04)
+    
     del_items.append(canvas)
     np_menu_items.append(main_name_label); del_items.append(main_name_label)
     np_menu_items.append(main_center); del_items.append(main_center)
     np_menu_items.append(main_edit); del_items.append(main_edit)
     np_menu_items.append(main_delete); del_items.append(main_delete)
+    np_menu_items.append(main_info); del_items.append(main_info)
     main_delete.configure(command=lambda p=new_main.parent, n=new_main.name, i=del_items : delete_main(p, n, i))
 
 def edit_interface(main, name_label:tk.Label, desc_label:tk.Label, days_label:tk.Label) -> None:
@@ -408,7 +443,7 @@ def edit_interface(main, name_label:tk.Label, desc_label:tk.Label, days_label:tk
     edit_menu_items.append(screenshot_label)
 
     back_button = tk.Button(frame, bg="black", fg="white", text="←", font=("Helvetica", 75, "bold"), relief="flat")
-    back_button.configure(command=back_from_edit)
+    back_button.configure(command=lambda i=edit_menu_items : back_from_interface(i))
     back_button.place(relx=-0.005, rely=-0.055, anchor="nw")
     edit_menu_items.append(back_button)
 
@@ -473,12 +508,12 @@ def edit_main(main, name_label:tk.Label, desc_label:tk.Label, days_label:tk.Labe
         desc_label.configure(text=gv.project.description)
         days_label.configure(text=f"{gv.project.calculate_days_left()}")
 
-    back_from_edit()
+    back_from_interface(edit_menu_items)
 
-def back_from_edit() -> None:
-    for i in range(len(edit_menu_items)):
-        edit_menu_items[i].destroy()
-    edit_menu_items.clear()
+def back_from_interface(items:list):
+    for i in range(len(items)):
+        items[i].destroy()
+    items.clear()
 
     choices = [0, 1]
     choice = rr.choice(choices)
@@ -500,6 +535,62 @@ def delete_main(parent, main_name:str, del_items:list) -> None:
             pass
     
     projutil.save_project()
+
+def info_interface(main) -> None:
+    try: 
+        gv.window.after_cancel(gv.star_loop[0])
+    except: 
+        pass
+
+    for star in gv.stars:
+        star[0].destroy()
+    gv.stars.clear()
+
+    x = gv.window.winfo_rootx()
+    y = gv.window.winfo_rooty()
+    w = gv.window.winfo_width()
+    h = gv.window.winfo_height()
+    frame = tk.Frame(gv.window, width=w, height=h)
+    frame.place(relx=0.5, rely=0.5, anchor="center")
+    screenshot = ImageGrab.grab(bbox=(x, y, x+w, y+h))
+    screenshot_photo = ImageTk.PhotoImage(screenshot)
+    screenshot_label = tk.Label(frame, image=screenshot_photo)
+    screenshot_label.image = screenshot_photo
+    screenshot_label.pack()
+    blurred_screenshot = screenshot.filter(ImageFilter.GaussianBlur(9))
+    screenshot_photo = ImageTk.PhotoImage(blurred_screenshot)
+    screenshot_label.configure(image=screenshot_photo)
+    screenshot_label.image = screenshot_photo
+    screenshot_label.pack()
+    info_menu_items.append(frame)
+    info_menu_items.append(screenshot_label)
+
+    back_button = tk.Button(gv.window, bg="black", fg="white", text="←", font=("Helvetica", 75, "bold"), relief="flat")
+    back_button.configure(command=lambda i=info_menu_items : back_from_interface(i))
+    back_button.place(relx=-0.005, rely=-0.055, anchor="nw")
+    info_menu_items.append(back_button)
+
+    info_large = tk.Label(gv.window, image=info_large_image, bd=0, bg="black")
+    info_large.place(relx=0.125, rely=0.5, anchor="s")
+    info_menu_items.append(info_large)
+    info_icon_label = tk.Label(gv.window, text="Info", bg="black", fg="white", font=("Times New Roman", 35, "bold"))
+    info_icon_label.place(relx=0.125, rely=0.5, anchor="n")
+    info_menu_items.append(info_icon_label)
+    name_label = tk.Label(gv.window, text=f"Name: {main.name}", bg="black", fg="white", font=("Times New Roman", 30, "bold"))
+    name_label.place(relx=0.5, rely=1/6, anchor="center")
+    info_menu_items.append(name_label)
+    desc_label = tk.Label(gv.window, text=f"Description: {main.description}", bg="black", fg="white", font=("Times New Roman", 30, "bold"))
+    desc_label.place(relx=0.5, rely=2/6, anchor="center")
+    info_menu_items.append(desc_label)
+    time_sensitive_label = tk.Label(gv.window, text=f"Time Sensitive: {main.time_sensitive}", bg="black", fg="white", font=("Times New Roman", 30, "bold"))
+    time_sensitive_label.place(relx=0.5, rely=3/6, anchor="center")
+    info_menu_items.append(time_sensitive_label)
+    deadline_label = tk.Label(gv.window, text=f"Deadline: {main.deadline}", bg="black", fg="white", font=("Times New Roman", 30, "bold"))
+    deadline_label.place(relx=0.5, rely=4/6, anchor="center")
+    info_menu_items.append(deadline_label)
+    notes_label = tk.Label(gv.window, text=f"Notes: {main.notes}", bg="black", fg="white", font=("Times New Roman", 30, "bold"))
+    notes_label.place(relx=0.5, rely=5/6, anchor="center")
+    info_menu_items.append(notes_label)
 
 def forward_parent(main:ds.Main) -> None:
     project_setup(main)

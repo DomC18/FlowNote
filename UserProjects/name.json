@@ -1,5 +1,5 @@
 {
-    "name": {
+    "projectdata": {
         "name": "FlowNote",
         "description": "An application to organize large projects into deconstructed pieces.",
         "time_sensitive": "True",

@@ -108,21 +108,21 @@ class Project:
             return
         
         for main in mains:
-            new_main = parent.add_main(main["name"], main["description"], main["time_sensitive"], main["deadline"], main["notes"])
-            if (len(main["mains"]) == 0):
+            new_main = parent.add_main(main["Name"], main["Description"], bool(main["TimeSensitive"]), main["Deadline"], main["Notes"])
+            if (len(main["Mains"]) == 0):
                 continue
-            self.build_mains(new_main, main["mains"])
+            self.build_mains(new_main, main["Mains"])
 
     def mains_dict_list(self, mains:list[Main]) -> list:
         result = []
         for main in mains:
             result.append({
-                "name": main.name,
-                "description": main.description,
-                "time_sensitive": str(main.time_sensitive),
-                "deadline": main.deadline,
-                "notes": main.notes,
-                "mains": self.mains_dict_list(main.mains)
+                "Name": main.name,
+                "Description": main.description,
+                "TimeSensitive": str(main.time_sensitive),
+                "Deadline": main.deadline,
+                "Notes": main.notes,
+                "Mains": self.mains_dict_list(main.mains)
             })
         return result       
 

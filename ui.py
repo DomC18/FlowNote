@@ -81,7 +81,11 @@ def project_select_screen() -> None:
     gv.window.attributes("-fullscreen", False)
     gv.window.geometry("600x600")
     gv.window.configure(bg="#414449")
+
+    for widget in gv.main_menu_buttons:
+        widget.place_forget()
     anim.forward_blur_animation(1)
+    
     back.configure(bg="#414449", fg="white", text="← Main Menu", font=("Helvetica", 16, "bold"), relief="flat")
     back.configure(command=lambda b=back, n=new_project_button, o=old_project_button : anim.backward_blur_animation(6, b, n, o))
     back.place(relx=0.02, rely=0.02, anchor="nw")
@@ -376,18 +380,18 @@ def child_ui(new_main, canvas:tk.Canvas, relx:float, rely:float):
     main_edit.configure(command=lambda m=new_main, ml=main_name_label : edit_interface(m, ml, None, None))
     main_edit.place(anchor="center", relx=relx-0.0575, rely=rely)
     main_delete = tk.Button(image=delete_image, bg="#abcaf6", bd=0, highlightthickness=0)
+    main_delete.configure(command=lambda p=new_main.parent, n=new_main.name, i=del_items : delete_main(p, n, i))
     main_delete.place(anchor="center", relx=relx+0.0575, rely=rely)
     main_info = tk.Button(image=info_image, bg="#abcaf6", bd=0, highlightthickness=0)
     main_info.configure(command=lambda m=new_main : info_interface(m))
     main_info.place(anchor="center", relx=relx, rely=rely+0.04)
-    
+
     del_items.append(canvas)
     np_menu_items.append(main_name_label); del_items.append(main_name_label)
     np_menu_items.append(main_center); del_items.append(main_center)
     np_menu_items.append(main_edit); del_items.append(main_edit)
     np_menu_items.append(main_delete); del_items.append(main_delete)
     np_menu_items.append(main_info); del_items.append(main_info)
-    main_delete.configure(command=lambda p=new_main.parent, n=new_main.name, i=del_items : delete_main(p, n, i))
 
 def edit_interface(main, name_label:tk.Label, desc_label:tk.Label, days_label:tk.Label) -> None:
     try: 
@@ -422,6 +426,9 @@ def edit_interface(main, name_label:tk.Label, desc_label:tk.Label, days_label:tk
         month_entry.place_forget()
         day_entry.place_forget()
         year_entry.place_forget()
+        month_var.set("")
+        day_var.set("")
+        year_var.set("")
 
     x = gv.window.winfo_rootx()
     y = gv.window.winfo_rooty()

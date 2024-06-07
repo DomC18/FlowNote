@@ -17,9 +17,6 @@ gv.star_loop = [None]
 blur_func_calls = 0
 
 def forward_blur_animation(radius:int) -> None:
-    if radius == 1:
-        for widget in gv.main_menu_buttons:
-            widget.place_forget()
     blurred_logo = logo.filter(ImageFilter.GaussianBlur(radius))
     logo_photo = ImageTk.PhotoImage(blurred_logo)
     gv.logo_label.configure(image=logo_photo)

@@ -42,6 +42,12 @@ class Main:
         
         return new_month + "/" + str(date_list[1]) + "/" + str(date_list[2])
 
+    def mains_with_deadline(self, deadline:str, mains:list, curr_mains:list):
+        for main in curr_mains:
+            if main.deadline == deadline or main.deadline == str(deadline[0:-2] + "20" + deadline[-2:]):
+                mains.append(f"{main.name.casefold().capitalize()}\n\n")
+            main.mains_with_deadline(deadline, mains, main.mains)
+
     def calculate_days_left(self) -> float:
         if not self.time_sensitive:
             return ""

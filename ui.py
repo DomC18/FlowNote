@@ -3,6 +3,7 @@ from tkinter import messagebox, filedialog
 from datetime import datetime, date
 import globalvariables as gv
 import animations as anim
+from cal import Calendar
 import tkinter as tk
 import random as rr
 import constants
@@ -81,7 +82,6 @@ def project_select_screen() -> None:
     gv.window.attributes("-fullscreen", False)
     gv.window.geometry("600x600")
     gv.window.configure(bg="#414449")
-
     for widget in gv.main_menu_buttons:
         widget.place_forget()
     anim.forward_blur_animation(1)
@@ -256,6 +256,11 @@ def project_setup(main):
             pass
     np_menu_items.clear()
 
+    calendar = Calendar(gv.window, gv.window.winfo_width(), gv.window.winfo_height(), "light blue", np_menu_items, lambda m=gv.project : project_setup(m))
+    calendar_button = tk.Button(master=gv.window, font=("Helvetica", 20, "bold"), bg="black", fg="white", relief="raised", text="Calendar")
+    calendar_button.configure(command=lambda f=(lambda m=gv.project : project_setup(m)) : calendar.toggle_show(f))
+    calendar_button.place(anchor="nw", relx=0.15, rely=0.002*16)
+
     canvas = tk.Canvas(gv.window, width=665, height=315, bd=0, highlightthickness=0, bg="black")
     canvas.place(anchor="n", relx=0.5, rely=0)
     canvas.create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
@@ -284,6 +289,7 @@ def project_setup(main):
         backward_parent.configure(command=lambda m=main : back_parent(m))
         backward_parent.place(anchor="e", relx=0.644, rely=((0.13125+0.1175)/2))
 
+    np_menu_items.append(calendar_button)
     np_menu_items.append(canvas)
     np_menu_items.append(name)
     np_menu_items.append(desc)
@@ -616,7 +622,6 @@ def init() -> None:
     cntue7 = tk.Button(bg="#e4eff6", font=("Times New Roman", 8, "bold"), bd=0, highlightthickness=0)
     cntue8 = tk.Button(bg="#e4eff6", font=("Times New Roman", 8, "bold"), bd=0, highlightthickness=0)
     cntue9 = tk.Button(bg="#e4eff6", font=("Times New Roman", 6, "bold"), bd=0, highlightthickness=0)
-    settings = tk.Button(text="⚙️", bg="#414449", bd=0, highlightthickness=0, font=("Helvetica", 26), height=0, fg="white")
     cntue.configure(command=project_select_screen)
     cntue2.configure(command=project_select_screen)
     cntue3.configure(command=project_select_screen)
@@ -635,8 +640,7 @@ def init() -> None:
     cntue7.place(relx=0.49, rely=0.395)
     cntue8.place(relx=0.515, rely=0.3775)
     cntue9.place(relx=0.43975, rely=0.3875)
-    settings.place(relx=0.87, rely=0.87)
     cntue.tkraise()
 
-    gv.main_menu_buttons = [cntue, cntue2, cntue3, cntue4, cntue5, cntue6, cntue7, cntue8, cntue9, settings]
+    gv.main_menu_buttons = [cntue, cntue2, cntue3, cntue4, cntue5, cntue6, cntue7, cntue8, cntue9]
     gv.window.mainloop()

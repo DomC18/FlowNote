@@ -50,6 +50,19 @@ def edit_main(main, name_entry:tk.Entry, desc_entry:tk.Entry, time_var:tk.IntVar
     
     return False
 
+def mains_with_deadline(deadline:str) -> list:
+    mains = []
+    if gv.project.deadline == deadline or gv.project.deadline == str(deadline[0:-2] + "20" + deadline[-2:]):
+        mains.append(f"{gv.project.name.casefold().capitalize()}\n\n")
+    for main in gv.project.mains:
+        if main.deadline == deadline or main.deadline == str(deadline[0:-2] + "20" + deadline[-2:]):
+            mains.append(f"{main.name.casefold().capitalize()}\n\n")
+        main.mains_with_deadline(deadline, mains, main.mains)
+    label_text = ""
+    for main in mains:
+        label_text += main
+    return label_text
+
 def load_project(filename:str) -> None:
     data:dict = {}
     file_dir = rf"{filename}"

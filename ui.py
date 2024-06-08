@@ -10,7 +10,7 @@ import constants
 import projutil
 import sounds
 import uiutil
-import ds
+import proj
 
 gv.window.title("FlowNote")
 width = 600
@@ -45,7 +45,7 @@ back = tk.Button()
 main_canvas_north_y = [0]
 main_xs = [1/12, 7/24, 0.5, 17/24, 11/12]
 
-np_menu_items = []
+gv.np_menu_items = []
 edit_menu_items = []
 info_menu_items = []
 
@@ -60,8 +60,6 @@ old_project_button = tk.Button(text="Open Project", font=("Consolas", 16, "bold"
 
 
 def project_select_screen() -> None:
-    global np_menu_items
-
     try: 
         gv.window.after_cancel(gv.star_loop[0])
     except: 
@@ -69,7 +67,7 @@ def project_select_screen() -> None:
 
     for star_comb in gv.stars:
         star_comb[0].destroy()
-    for widget in np_menu_items:
+    for widget in gv.np_menu_items:
         try: 
             widget.place_forget()
         except: 
@@ -77,7 +75,7 @@ def project_select_screen() -> None:
 
     sounds.play_click()
     sky_label.pack_forget()
-    np_menu_items = []
+    gv.np_menu_items.clear()
 
     gv.window.attributes("-fullscreen", False)
     gv.window.geometry("600x600")
@@ -126,6 +124,8 @@ def choose_project(back:tk.Button) -> None:
 
 def new_project_screen(back:tk.Button) -> None:
     sounds.play_click()
+    gv.project = None
+    gv.touched_gold = False
     sky_label.pack()
     choices = [0, 1]
     choice = rr.choice(choices)
@@ -141,7 +141,7 @@ def new_project_screen(back:tk.Button) -> None:
     user_year = tk.StringVar()
     user_year.set("")
     date_to_complete_label = tk.Label(font=("Helvetica", 18, "bold"), text="Date To Complete*", fg="white", bg="black")
-    np_menu_items.append(date_to_complete_label)
+    gv.np_menu_items.append(date_to_complete_label)
     years = [str(datetime.today().year+i) for i in range(11)]
     project_month = tk.OptionMenu(gv.window, user_month, "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
     project_day = tk.OptionMenu(gv.window, user_day, '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th', '13th', '14th', '15th', '16th', '17th', '18th', '19th', '20th', '21st', '22nd', '23rd', '24th', '25th', '26th', '27th', '28th', '29th', '30th', '31st')
@@ -179,41 +179,41 @@ def new_project_screen(back:tk.Button) -> None:
     name_label.place(anchor="s", relx=0.5, rely=(1/7)-0.03)
     project_name = tk.Entry(gv.window, validate="key", validatecommand=(char30, "%P"), font=("Helvetica", 18))
     project_name.place(relx=0.5, rely=1/7, anchor="center")
-    np_menu_items.append(name_label)
-    np_menu_items.append(project_name)
+    gv.np_menu_items.append(name_label)
+    gv.np_menu_items.append(project_name)
     description_label = tk.Label(font=("Helvetica", 18, "bold"), text="Project Description", fg="white", bg="black")
     description_label.place(anchor="s", relx=0.5, rely=(2/7)-0.03)
     project_description = tk.Entry(font=("Helvetica", 18), validate="key", validatecommand=(char100, "%P"))
     project_description.place(relx=0.5, rely=2/7, anchor="center")
-    np_menu_items.append(project_description)
-    np_menu_items.append(description_label)
+    gv.np_menu_items.append(project_description)
+    gv.np_menu_items.append(description_label)
     time_sensitive_label = tk.Label(font=("Helvetica", 18, "bold"), text="Time Sensitive?*", fg="white", bg="black")
     time_sensitive_label.place(anchor="s", relx=0.5, rely=(3/7)-0.03)
     project_time_sensitive_y.configure(bg="green", text="YES", font=("Helvetica", 18))
     project_time_sensitive_y.configure(command=lambda a=project_time_sensitive_y, b=project_time_sensitive_n : time_sensitive_true(a,b))
     project_time_sensitive_y.place(relx=0.5-0.00975, rely=3/7, anchor="e")
-    np_menu_items.append(project_time_sensitive_y)
+    gv.np_menu_items.append(project_time_sensitive_y)
     project_time_sensitive_n.configure(bg="red", text="NO", font=("Helvetica", 18))
     project_time_sensitive_n.configure(command=lambda a=project_time_sensitive_y, b=project_time_sensitive_n : time_sensitive_false(a,b))
     project_time_sensitive_n.place(relx=0.5+0.00975, rely=3/7, anchor="w")
-    np_menu_items.append(project_time_sensitive_n)
-    np_menu_items.append(time_sensitive_label)
+    gv.np_menu_items.append(project_time_sensitive_n)
+    gv.np_menu_items.append(time_sensitive_label)
     project_month.place(relx=0.5-0.035, rely=4/7, anchor="e")
-    np_menu_items.append(project_month)
+    gv.np_menu_items.append(project_month)
     project_day.place(relx=0.5, rely=4/7, anchor="center")
-    np_menu_items.append(project_day)
+    gv.np_menu_items.append(project_day)
     project_year.place(relx=0.5+0.035, rely=4/7, anchor="w")
-    np_menu_items.append(project_year)
+    gv.np_menu_items.append(project_year)
     notes_label = tk.Label(font=("Helvetica", 18, "bold"), text="Notes", fg="white", bg="black")
     notes_label.place(anchor="s", relx=0.5, rely=(5/7)-0.03)
     project_notes = tk.Entry(font=("Helvetica", 18), validate="key", validatecommand=(char100, "%P"))
     project_notes.place(relx=0.5, rely=5/7, anchor="center")
-    np_menu_items.append(notes_label)
-    np_menu_items.append(project_notes)
+    gv.np_menu_items.append(notes_label)
+    gv.np_menu_items.append(project_notes)
     project_submit = tk.Button(font=("Helvetica", 25, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0)
     project_submit.configure(command=lambda na=project_name, dsc=project_description, ts=time_sensitive, yr=user_year, mo=user_month, day=user_day, rq=project_notes : new_project_submit(na, dsc, ts, yr, mo, day, rq))
     project_submit.place(relx=0.5, rely=6/7, anchor="center")
-    np_menu_items.append(project_submit)
+    gv.np_menu_items.append(project_submit)
     time_sensitive_true(project_time_sensitive_y, project_time_sensitive_n)
     back.configure(command=project_select_screen, text="← Main Menu", font=("Helvetica", 20, "bold"), bg="black", fg="white", relief="raised")
     back.place(relx=0.002*9, rely=0.002*16, anchor="nw")
@@ -236,33 +236,37 @@ def new_project_submit(name:tk.Entry, description:tk.Entry, time_sensitive:list,
     elif time_sensitive[0] == True:
         date_mo = uiutil.determine_month(date_month.get())
         date_dy = uiutil.determine_day(date_day.get())
-        if not ds.Project.date_after_current(date(int(date_year.get()), int(date_mo), int(date_dy))):
+        if not proj.Project.date_after_current(date(int(date_year.get()), int(date_mo), int(date_dy))):
             messagebox.showerror("Invalid Date", "Date entered is before or equal to the date today.")
             return
 
     sounds.play_click()
     new_date = date_mo + "/" + date_dy + "/" + ((date_year.get()) if ((date_year.get()) != "") else ("0000"))
     
-    gv.project = ds.Project(name.get(), description.get(), time_sensitive[0], new_date, notes.get())
+    gv.project = proj.Project(name.get(), description.get(), time_sensitive[0], new_date, notes.get())
     projutil.save_project()
     
     project_setup(gv.project)
     
 def project_setup(main):
-    for widget in np_menu_items:
+    for widget in gv.np_menu_items:
         try:
             widget.place_forget()
         except:
             pass
-    np_menu_items.clear()
+    gv.np_menu_items.clear()
 
-    calendar = Calendar(gv.window, gv.window.winfo_width(), gv.window.winfo_height(), "light blue", np_menu_items, lambda m=gv.project : project_setup(m))
+    calendar = Calendar(gv.window, gv.window.winfo_width(), gv.window.winfo_height(), "light blue", gv.np_menu_items, lambda m=gv.project : project_setup(m))
     calendar_button = tk.Button(master=gv.window, font=("Helvetica", 20, "bold"), bg="black", fg="white", relief="raised", text="Calendar")
     calendar_button.configure(command=lambda f=(lambda m=gv.project : project_setup(m)) : calendar.toggle_show(f))
     calendar_button.place(anchor="nw", relx=0.15, rely=0.002*16)
     tree_button = tk.Button(master=gv.window, font=("Helvetica", 20, "bold"), bg="black", fg="white", relief="raised", text="Tree")
     tree_button.configure(command=projutil.update_curr_tree)
     tree_button.place(anchor="nw", relx=0.25, rely=0.002*16)
+    gv.gold_button = tk.Button(master=gv.window, font=("Helvetica", 8, "bold"), bg="black", fg="white", relief="raised", text="Gold")
+    if gv.touched_gold:
+        gv.gold_button.configure(command=exit)
+        gv.gold_button.place(anchor="ne", relx=0.95, rely=0.002*16)
 
     canvas = tk.Canvas(gv.window, width=665, height=315, bd=0, highlightthickness=0, bg="black")
     canvas.place(anchor="n", relx=0.5, rely=0)
@@ -292,15 +296,16 @@ def project_setup(main):
         backward_parent.configure(command=lambda m=main : back_parent(m))
         backward_parent.place(anchor="e", relx=0.644, rely=((0.13125+0.1175)/2))
 
-    np_menu_items.append(calendar_button)
-    np_menu_items.append(tree_button)
-    np_menu_items.append(canvas)
-    np_menu_items.append(name)
-    np_menu_items.append(desc)
-    np_menu_items.append(days)
-    np_menu_items.append(edit)
-    np_menu_items.append(info)
-    np_menu_items.append(backward_parent)
+    gv.np_menu_items.append(gv.gold_button)
+    gv.np_menu_items.append(calendar_button)
+    gv.np_menu_items.append(tree_button)
+    gv.np_menu_items.append(canvas)
+    gv.np_menu_items.append(name)
+    gv.np_menu_items.append(desc)
+    gv.np_menu_items.append(days)
+    gv.np_menu_items.append(edit)
+    gv.np_menu_items.append(info)
+    gv.np_menu_items.append(backward_parent)
     mains_setup(main)
 
 def mains_setup(parent) -> None:
@@ -312,8 +317,8 @@ def mains_setup(parent) -> None:
     main_creates = [tk.Button(font=("Helvetica", 16, "bold"), text="Submit", bg="green", bd=0, highlightthickness=0) for _ in range(15)]
     number_entry = tk.Entry(width=3, font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, justify="center", validate="key", validatecommand=(char2, "%P"))
     number_confirm = tk.Button(font=("Helvetica", 20, "bold"), bd=0, highlightthickness=0, justify="center", bg="green", fg="black", text="✅")
-    np_menu_items.append(number_entry)
-    np_menu_items.append(number_confirm)
+    gv.np_menu_items.append(number_entry)
+    gv.np_menu_items.append(number_confirm)
 
     YOFF = 0.05
     YOFF2 = 0.17125
@@ -322,7 +327,7 @@ def mains_setup(parent) -> None:
         canvases[i].place(anchor="n", relx=main_xs[(i%5)], rely=0.4-YOFF+(int(i/5)*YOFF2))
         canvases[i].create_image(0, 0, image=sky_mini_photo, anchor=tk.NW)
         canvases[i].create_oval(7.5, 7.5, 300, 180, fill="#abcaf6", outline="white", width=2)
-        np_menu_items.append(canvases[i])
+        gv.np_menu_items.append(canvases[i])
         child_ui(parent.mains[i], canvases[i], main_xs[(i%5)], 0.435+(int(i/5)*YOFF2))
 
     def how_many_mains() -> None:
@@ -354,15 +359,15 @@ def mains_setup(parent) -> None:
             main_names[i].place(anchor="s", relx=main_xs[(i%5)], rely=0.48-YOFF+(int(i/5)*YOFF2))
             main_creates[i].configure(command=lambda p=parent, n=main_names[i], l=name_labels[i], c=main_creates[i], ca=canvases[i], x=main_xs[(i%5)], y=0.435+(int(i/5)*YOFF2) : setup_main(p, n, l, c, ca, x, y))
             main_creates[i].place(anchor="s", relx=main_xs[(i%5)], rely=0.5575-YOFF+(int(i/5)*YOFF2))
-            np_menu_items.append(canvases[i])
-            np_menu_items.append(name_labels[i])
-            np_menu_items.append(main_names[i])
-            np_menu_items.append(main_creates[i])
+            gv.np_menu_items.append(canvases[i])
+            gv.np_menu_items.append(name_labels[i])
+            gv.np_menu_items.append(main_names[i])
+            gv.np_menu_items.append(main_creates[i])
 
     plus = tk.Button(text="➕", font=("Helvetica", 16, "bold"), bd=0, highlightthickness=0, bg="black", fg="white")
     plus.configure(command=how_many_mains)
     plus.place(anchor="w", relx=0.45, rely=0.3375)
-    np_menu_items.append(plus)
+    gv.np_menu_items.append(plus)
 
 def setup_main(parent, name:tk.Entry, label:tk.Label, create:tk.Button, canvas:tk.Canvas, relx:float, rely:float) -> None:
     if name.get() == "":
@@ -397,11 +402,11 @@ def child_ui(new_main, canvas:tk.Canvas, relx:float, rely:float):
     main_info.place(anchor="center", relx=relx, rely=rely+0.04)
 
     del_items.append(canvas)
-    np_menu_items.append(main_name_label); del_items.append(main_name_label)
-    np_menu_items.append(main_center); del_items.append(main_center)
-    np_menu_items.append(main_edit); del_items.append(main_edit)
-    np_menu_items.append(main_delete); del_items.append(main_delete)
-    np_menu_items.append(main_info); del_items.append(main_info)
+    gv.np_menu_items.append(main_name_label); del_items.append(main_name_label)
+    gv.np_menu_items.append(main_center); del_items.append(main_center)
+    gv.np_menu_items.append(main_edit); del_items.append(main_edit)
+    gv.np_menu_items.append(main_delete); del_items.append(main_delete)
+    gv.np_menu_items.append(main_info); del_items.append(main_info)
 
 def edit_interface(main, name_label:tk.Label, desc_label:tk.Label, days_label:tk.Label) -> None:
     try: 
@@ -609,10 +614,10 @@ def info_interface(main) -> None:
     notes_label.place(relx=0.5, rely=5/6, anchor="center")
     info_menu_items.append(notes_label)
 
-def forward_parent(main:ds.Main) -> None:
+def forward_parent(main:proj.Main) -> None:
     project_setup(main)
 
-def back_parent(main:ds.Main) -> None:
+def back_parent(main:proj.Main) -> None:
     parent = main.parent
     project_setup(parent)
 

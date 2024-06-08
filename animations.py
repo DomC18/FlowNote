@@ -3,6 +3,7 @@ import globalvariables as gv
 import tkinter as tk
 import random as rr
 import constants
+import projutil
 import sounds
 
 gv.window = tk.Tk()
@@ -71,6 +72,13 @@ def inc_score(inc=1):
 
 def gold_score():
     inc_score(50)
+    if not gv.touched_gold:
+        gv.touched_gold = True
+        gv.gold_button = tk.Button(master=gv.window, font=("Helvetica", 8, "bold"), bg="black", fg="white", relief="raised", text="Gold")
+        gv.gold_button.configure(command=exit)
+        gv.gold_button.place(anchor="ne", relx=0.95, rely=0.002*16)
+        gv.np_menu_items.append(gv.gold_button)
+        projutil.save_project()
 
 def proj_bg_pos_generator() -> list:
     screen_range = range(1, 1001)
@@ -98,13 +106,19 @@ def proj_bg_hor() -> None:
     idx = 1
     for y in y_positions:
         resizing = rr.choice(range(10, 41))
-        logo = regular_logo
+        if not gv.touched_gold:
+            initisGold = rr.choice(range(1, 1001)) == 1000
+            logo = gold_logo if initisGold else regular_logo
+        else:
+            initisGold = True
+            logo = gold_logo
         logo = logo.resize((resizing, resizing), Image.Resampling.LANCZOS)
         logo_photo = ImageTk.PhotoImage(logo)
         logo_label = tk.Button(gv.window, image=logo_photo, relief="flat", bd=0, highlightthickness=0)
         logo_label.image = logo_photo
         logo_label.place(relx=x_increase*idx, rely=y)
-        logo_label.configure(command=inc_score)
+        if initisGold: logo_label.configure(command=gold_score)
+        else: logo_label.configure(command=inc_score)
         idx += 1
         gv.stars.append((logo_label, x_increase*idx, y, rr.choice(speed_range) / 10000, rr.choice(degrees_range)))
     
@@ -115,8 +129,12 @@ def proj_bg_hor() -> None:
                 star_comb[0].place_forget()
                 if star_comb[1] - star_comb[3] <= 0:
                     resizing = rr.choice(range(10, 41))
-                    isGold = rr.choice(range(1, 1001)) == 1000
-                    logo = gold_logo if isGold else regular_logo
+                    if not gv.touched_gold:
+                        isGold = rr.choice(range(1, 1001)) == 1000
+                        logo = gold_logo if isGold else regular_logo
+                    else:
+                        isGold = True
+                        logo = gold_logo
                     logo = logo.resize((resizing, resizing), Image.Resampling.LANCZOS)
                     logo_photo = ImageTk.PhotoImage(logo)
                     star_comb[0].configure(image=logo_photo)
@@ -142,8 +160,12 @@ def proj_bg_hor() -> None:
                 star_comb[0].place_forget()
                 if star_comb[1] - star_comb[3] >= 1:
                     resizing = rr.choice(range(10, 41))
-                    isGold = rr.choice(range(1, 1001)) == 1000
-                    logo = gold_logo if isGold else regular_logo
+                    if not gv.touched_gold:
+                        isGold = rr.choice(range(1, 1001)) == 1000
+                        logo = gold_logo if isGold else regular_logo
+                    else:
+                        isGold = True
+                        logo = gold_logo
                     logo = logo.resize((resizing, resizing), Image.Resampling.LANCZOS)
                     logo_photo = ImageTk.PhotoImage(logo)
                     star_comb[0].configure(image=logo_photo)
@@ -187,12 +209,19 @@ def proj_bg_vert() -> None:
     idx = 1
     for x in x_positions:
         resizing = rr.choice(range(10, 41))
-        logo = regular_logo
+        if not gv.touched_gold:
+            initisGold = rr.choice(range(1, 1001)) == 1000
+            logo = gold_logo if initisGold else regular_logo
+        else:
+            initisGold = True
+            logo = gold_logo
         logo = logo.resize((resizing, resizing), Image.Resampling.LANCZOS)
         logo_photo = ImageTk.PhotoImage(logo)
         logo_label = tk.Button(gv.window, image=logo_photo, relief="flat", bd=0, highlightthickness=0)
         logo_label.image = logo_photo
         logo_label.place(relx=x, rely=y_increase*idx)
+        if initisGold: logo_label.configure(command=gold_score)
+        else: logo_label.configure(command=inc_score)
         idx += 1
         gv.stars.append((logo_label, x, y_increase*idx, rr.choice(speed_range) / 10000, rr.choice(degrees_range)))
     
@@ -203,8 +232,12 @@ def proj_bg_vert() -> None:
                 star_comb[0].place_forget()
                 if star_comb[2] - star_comb[3] <= 0:
                     resizing = rr.choice(range(10, 41))
-                    isGold = rr.choice(range(1, 1001)) == 1000
-                    logo = gold_logo if isGold else regular_logo
+                    if not gv.touched_gold:
+                        isGold = rr.choice(range(1, 1001)) == 1000
+                        logo = gold_logo if isGold else regular_logo
+                    else:
+                        isGold = True
+                        logo = gold_logo
                     logo = logo.resize((resizing, resizing), Image.Resampling.LANCZOS)
                     logo_photo = ImageTk.PhotoImage(logo)
                     star_comb[0].configure(image=logo_photo)
@@ -230,8 +263,12 @@ def proj_bg_vert() -> None:
                 star_comb[0].place_forget()
                 if star_comb[2] - star_comb[3] >= 1:
                     resizing = rr.choice(range(10, 41))
-                    isGold = rr.choice(range(1, 1001)) == 1000
-                    logo = gold_logo if isGold else regular_logo
+                    if not gv.touched_gold:
+                        isGold = rr.choice(range(1, 1001)) == 1000
+                        logo = gold_logo if isGold else regular_logo
+                    else:
+                        isGold = True
+                        logo = gold_logo
                     logo = logo.resize((resizing, resizing), Image.Resampling.LANCZOS)
                     logo_photo = ImageTk.PhotoImage(logo)
                     star_comb[0].configure(image=logo_photo)

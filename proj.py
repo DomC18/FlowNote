@@ -116,7 +116,7 @@ class Project:
             return
         
         for main in mains:
-            new_main = parent.add_main(main["Name"], main["Description"], bool(main["TimeSensitive"]), main["Deadline"], main["Notes"])
+            new_main = parent.add_main(main["Name"], main["Description"], bool(main["TimeSensitive"]) if main["TimeSensitive"] == "True" else False, main["Deadline"], main["Notes"])
             if (len(main["Mains"]) == 0):
                 continue
             self.build_mains(new_main, main["Mains"])

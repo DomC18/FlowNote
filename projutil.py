@@ -7,7 +7,7 @@ import constants
 import uiutil
 import sounds
 import json
-import ds
+import proj
 import os
 
 def update_existing_names() -> None:
@@ -30,7 +30,7 @@ def edit_main(main, name_entry:tk.Entry, desc_entry:tk.Entry, time_var:tk.IntVar
         if date_mo == "" or date_dy == "" or yr_var.get() == "":
             messagebox.showerror("Invalid Date", "Please enter a valid date.")
             return
-        if not ds.Project.date_after_current(date(int(yr_var.get()), int(date_mo), int(date_dy))):
+        if not proj.Project.date_after_current(date(int(yr_var.get()), int(date_mo), int(date_dy))):
             messagebox.showerror("Invalid Date", "Date entered is before or equal to the date today.")
             return
     
@@ -83,22 +83,24 @@ def load_project(filename:str) -> None:
     except FileNotFoundError:
         return
     
-    gv.project = ds.Project(data["projectdata"]["Name"], 
+    gv.project = proj.Project(data["projectdata"]["Name"], 
                             data["projectdata"]["Description"], 
-                            data["projectdata"]["TimeSensitive"], 
+                            bool(data["projectdata"]["TimeSensitive"]) if data["projectdata"]["TimeSensitive"] == "True" else False, 
                             data["projectdata"]["Deadline"], 
                             data["projectdata"]["Notes"]
     )
 
     mains = data["projectdata"]["Mains"]
     gv.project.build_mains(gv.project, mains)
+    gv.touched_gold = bool(data["touchedGold"])
 
 def save_project() -> None:
     data:dict = {}
     file_dir = constants.USER_PROJECTS_PATH + rf"\{gv.project.name}.json"
 
     data = {
-        "projectdata" : gv.project.as_dict()
+        "projectdata" : gv.project.as_dict(),
+        "touchedGold": str(gv.touched_gold) if gv.touched_gold else ""
     }
 
     try:

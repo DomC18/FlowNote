@@ -65,8 +65,12 @@ def backward_blur_animation(radius:int, back:tk.Button, new_project:tk.Button, o
         blur_func_calls = 0
 
 
-def inc_score():
-    gv.star_score += 1
+def inc_score(inc=1):
+    gv.star_score += inc
+    print(gv.star_score)
+
+def gold_score():
+    inc_score(50)
 
 def proj_bg_pos_generator() -> list:
     screen_range = range(1, 1001)
@@ -84,7 +88,9 @@ def proj_bg_pos_generator() -> list:
 
 def proj_bg_hor() -> None:
     gv.stars = []
-    logo = Image.open(constants.LOGO_WITH_SKY_ICON)
+    logo : Image
+    regular_logo = Image.open(constants.LOGO_WITH_SKY_ICON)
+    gold_logo = Image.open(constants.GOLDLOGO_WITH_SKY_ICON)
     x_increase = 1/42
     y_positions = proj_bg_pos_generator()
     speed_range = range(5,401)
@@ -92,6 +98,7 @@ def proj_bg_hor() -> None:
     idx = 1
     for y in y_positions:
         resizing = rr.choice(range(10, 41))
+        logo = regular_logo
         logo = logo.resize((resizing, resizing), Image.Resampling.LANCZOS)
         logo_photo = ImageTk.PhotoImage(logo)
         logo_label = tk.Button(gv.window, image=logo_photo, relief="flat", bd=0, highlightthickness=0)
@@ -107,6 +114,15 @@ def proj_bg_hor() -> None:
             try:
                 star_comb[0].place_forget()
                 if star_comb[1] - star_comb[3] <= 0:
+                    resizing = rr.choice(range(10, 41))
+                    isGold = rr.choice(range(1, 1001)) == 1000
+                    logo = gold_logo if isGold else regular_logo
+                    logo = logo.resize((resizing, resizing), Image.Resampling.LANCZOS)
+                    logo_photo = ImageTk.PhotoImage(logo)
+                    star_comb[0].configure(image=logo_photo)
+                    star_comb[0].image = logo_photo
+                    if isGold: star_comb[0].configure(command=gold_score)
+                    else: star_comb[0].configure(command=inc_score)
                     star_comb[1] = 1
                     star_comb[3] = rr.choice(speed_range) / 10000
                 else:
@@ -125,6 +141,15 @@ def proj_bg_hor() -> None:
             try:
                 star_comb[0].place_forget()
                 if star_comb[1] - star_comb[3] >= 1:
+                    resizing = rr.choice(range(10, 41))
+                    isGold = rr.choice(range(1, 1001)) == 1000
+                    logo = gold_logo if isGold else regular_logo
+                    logo = logo.resize((resizing, resizing), Image.Resampling.LANCZOS)
+                    logo_photo = ImageTk.PhotoImage(logo)
+                    star_comb[0].configure(image=logo_photo)
+                    star_comb[0].image = logo_photo
+                    if isGold: star_comb[0].configure(command=gold_score)
+                    else: star_comb[0].configure(command=inc_score)
                     star_comb[1] = 0
                     star_comb[3] = rr.choice(speed_range) / 10000
                 else:
@@ -152,7 +177,9 @@ def proj_bg_hor() -> None:
 
 def proj_bg_vert() -> None:
     gv.stars = []
-    logo = Image.open(constants.LOGO_WITH_SKY_ICON)
+    logo : Image
+    regular_logo = Image.open(constants.LOGO_WITH_SKY_ICON)
+    gold_logo = Image.open(constants.GOLDLOGO_WITH_SKY_ICON)
     x_positions = proj_bg_pos_generator()
     y_increase = 1/42
     speed_range = range(10,601,1)
@@ -160,6 +187,7 @@ def proj_bg_vert() -> None:
     idx = 1
     for x in x_positions:
         resizing = rr.choice(range(10, 41))
+        logo = regular_logo
         logo = logo.resize((resizing, resizing), Image.Resampling.LANCZOS)
         logo_photo = ImageTk.PhotoImage(logo)
         logo_label = tk.Button(gv.window, image=logo_photo, relief="flat", bd=0, highlightthickness=0)
@@ -174,6 +202,15 @@ def proj_bg_vert() -> None:
             try:
                 star_comb[0].place_forget()
                 if star_comb[2] - star_comb[3] <= 0:
+                    resizing = rr.choice(range(10, 41))
+                    isGold = rr.choice(range(1, 1001)) == 1000
+                    logo = gold_logo if isGold else regular_logo
+                    logo = logo.resize((resizing, resizing), Image.Resampling.LANCZOS)
+                    logo_photo = ImageTk.PhotoImage(logo)
+                    star_comb[0].configure(image=logo_photo)
+                    star_comb[0].image = logo_photo
+                    if isGold: star_comb[0].configure(command=gold_score)
+                    else: star_comb[0].configure(command=inc_score)
                     star_comb[2] = 1
                     star_comb[3] = rr.choice(speed_range) / 10000
                 else:
@@ -192,6 +229,15 @@ def proj_bg_vert() -> None:
             try:
                 star_comb[0].place_forget()
                 if star_comb[2] - star_comb[3] >= 1:
+                    resizing = rr.choice(range(10, 41))
+                    isGold = rr.choice(range(1, 1001)) == 1000
+                    logo = gold_logo if isGold else regular_logo
+                    logo = logo.resize((resizing, resizing), Image.Resampling.LANCZOS)
+                    logo_photo = ImageTk.PhotoImage(logo)
+                    star_comb[0].configure(image=logo_photo)
+                    star_comb[0].image = logo_photo
+                    if isGold: star_comb[0].configure(command=gold_score)
+                    else: star_comb[0].configure(command=inc_score)
                     star_comb[2] = 0
                     star_comb[3] = rr.choice(speed_range) / 10000
                 else:

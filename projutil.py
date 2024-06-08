@@ -5,6 +5,7 @@ from datetime import date
 import tkinter as tk
 import constants
 import uiutil
+import sounds
 import json
 import ds
 import os
@@ -15,6 +16,7 @@ def update_existing_names() -> None:
         gv.existing_names.append(file.split(".")[0])
 
 def update_curr_tree() -> None:
+    sounds.play_click()
     gv.tree_root = None
     gv.project.build_tree(gv.tree_root, gv.project.mains)
     gv.tree_visualizer = None

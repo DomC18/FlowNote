@@ -1,4 +1,6 @@
+from treevis import TreeNode
 from datetime import datetime, date
+import globalvariables as gv
 import time
 
 class Main:
@@ -118,6 +120,20 @@ class Project:
             if (len(main["Mains"]) == 0):
                 continue
             self.build_mains(new_main, main["Mains"])
+
+    def build_tree(self, parent, mains=[]) -> None:
+        if parent == gv.tree_root:
+            gv.tree_root = TreeNode(self.name)
+            parent = gv.tree_root
+            if len(mains) == 0:
+                return
+
+        for main in mains:
+            new_branch = TreeNode(main.name)
+            parent.add_child(new_branch)
+            if (len(main.mains) == 0):
+                continue
+            self.build_tree(new_branch, main.mains)
 
     def mains_dict_list(self, mains:list[Main]) -> list:
         result = []

@@ -260,6 +260,9 @@ def project_setup(main):
     calendar_button = tk.Button(master=gv.window, font=("Helvetica", 20, "bold"), bg="black", fg="white", relief="raised", text="Calendar")
     calendar_button.configure(command=lambda f=(lambda m=gv.project : project_setup(m)) : calendar.toggle_show(f))
     calendar_button.place(anchor="nw", relx=0.15, rely=0.002*16)
+    tree_button = tk.Button(master=gv.window, font=("Helvetica", 20, "bold"), bg="black", fg="white", relief="raised", text="Tree")
+    tree_button.configure(command=projutil.update_curr_tree)
+    tree_button.place(anchor="nw", relx=0.25, rely=0.002*16)
 
     canvas = tk.Canvas(gv.window, width=665, height=315, bd=0, highlightthickness=0, bg="black")
     canvas.place(anchor="n", relx=0.5, rely=0)
@@ -290,6 +293,7 @@ def project_setup(main):
         backward_parent.place(anchor="e", relx=0.644, rely=((0.13125+0.1175)/2))
 
     np_menu_items.append(calendar_button)
+    np_menu_items.append(tree_button)
     np_menu_items.append(canvas)
     np_menu_items.append(name)
     np_menu_items.append(desc)

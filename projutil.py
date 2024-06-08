@@ -1,4 +1,5 @@
 from tkinter import messagebox
+from treevis import TreeVisualizer
 import globalvariables as gv
 from datetime import date
 import tkinter as tk
@@ -12,6 +13,13 @@ def update_existing_names() -> None:
     gv.existing_names = []
     for file in os.listdir(constants.USER_PROJECTS_PATH):
         gv.existing_names.append(file.split(".")[0])
+
+def update_curr_tree() -> None:
+    gv.tree_root = None
+    gv.project.build_tree(gv.tree_root, gv.project.mains)
+    gv.tree_visualizer = None
+    gv.tree_visualizer = TreeVisualizer(gv.tree_root)
+    gv.tree_visualizer.run()
 
 def edit_main(main, name_entry:tk.Entry, desc_entry:tk.Entry, time_var:tk.IntVar, mo_var:tk.StringVar, dy_var:tk.StringVar, yr_var:tk.StringVar, notes_entry:tk.Entry):
     if time_var.get() == 1:

@@ -249,7 +249,7 @@ class Calendar:
                 self.week_frames[i].place_forget()
         for i in range(35):
             self.month_frames[i].place(relx=((1/7)*((i+7)%7)), rely=(0.2*(int(i/7))), anchor="nw")
-            self.month_labels[i].configure(text=(((self.month_values[i])+"\n"+(self.curr_month_mains[i].get())) 
+            self.month_labels[i].configure(text=(((self.month_values[i])+"\n\n"+(self.curr_month_mains[i].get())) 
                                                  if ((self.curr_month_mains[i].get()) != "") 
                                                  else (self.month_values[i])))
             self.month_labels[i].grid(row=0, column=0)

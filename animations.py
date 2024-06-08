@@ -65,6 +65,8 @@ def backward_blur_animation(radius:int, back:tk.Button, new_project:tk.Button, o
         blur_func_calls = 0
 
 
+def inc_score():
+    gv.star_score += 1
 
 def proj_bg_pos_generator() -> list:
     screen_range = range(1, 1001)
@@ -95,6 +97,7 @@ def proj_bg_hor() -> None:
         logo_label = tk.Button(gv.window, image=logo_photo, relief="flat", bd=0, highlightthickness=0)
         logo_label.image = logo_photo
         logo_label.place(relx=x_increase*idx, rely=y)
+        logo_label.configure(command=inc_score)
         idx += 1
         gv.stars.append((logo_label, x_increase*idx, y, rr.choice(speed_range) / 10000, rr.choice(degrees_range)))
     

@@ -72,9 +72,9 @@ def inc_score(inc=1):
 
 def gold_score():
     inc_score(50)
-    if not gv.touched_gold:
+    if not gv.touched_gold and gv.project != None:
         gv.touched_gold = True
-        gv.gold_button = tk.Button(master=gv.window, font=("Helvetica", 8, "bold"), bg="black", fg="white", relief="raised", text="Gold")
+        gv.gold_button = tk.Button(master=gv.window, font=("Helvetica", 8, "bold"), bg="black", fg="white", relief="raised", text="P")
         gv.gold_button.configure(command=exit)
         gv.gold_button.place(anchor="ne", relx=0.95, rely=0.002*16)
         gv.np_menu_items.append(gv.gold_button)
@@ -101,8 +101,7 @@ def proj_bg_hor() -> None:
     gold_logo = Image.open(constants.GOLDLOGO_WITH_SKY_ICON)
     x_increase = 1/42
     y_positions = proj_bg_pos_generator()
-    speed_range = range(5,401)
-    degrees_range = range(1,21)
+    speed_range = range(20,201)
     idx = 1
     for y in y_positions:
         resizing = rr.choice(range(10, 41))
@@ -120,7 +119,7 @@ def proj_bg_hor() -> None:
         if initisGold: logo_label.configure(command=gold_score)
         else: logo_label.configure(command=inc_score)
         idx += 1
-        gv.stars.append((logo_label, x_increase*idx, y, rr.choice(speed_range) / 10000, rr.choice(degrees_range)))
+        gv.stars.append((logo_label, x_increase*idx, y, rr.choice(speed_range) / 10000))
     
     def loop_l() -> str:
         for idx, star_comb in enumerate(gv.stars):
@@ -149,7 +148,7 @@ def proj_bg_hor() -> None:
                 gv.stars[idx] = tuple(star_comb)
             except:
                 pass
-        this_loop = gv.window.after(50, loop_l)
+        this_loop = gv.window.after(33, loop_l)
         gv.star_loop[0] = this_loop
         return this_loop
 
@@ -180,7 +179,7 @@ def proj_bg_hor() -> None:
                 gv.stars[idx] = tuple(star_comb)
             except:
                 pass
-        this_loop = gv.window.after(50, loop_r)
+        this_loop = gv.window.after(33, loop_r)
         gv.star_loop[0] = this_loop
         return this_loop
     
@@ -204,8 +203,7 @@ def proj_bg_vert() -> None:
     gold_logo = Image.open(constants.GOLDLOGO_WITH_SKY_ICON)
     x_positions = proj_bg_pos_generator()
     y_increase = 1/42
-    speed_range = range(10,601,1)
-    degrees_range = range(1,21)
+    speed_range = range(20,201)
     idx = 1
     for x in x_positions:
         resizing = rr.choice(range(10, 41))
@@ -223,7 +221,7 @@ def proj_bg_vert() -> None:
         if initisGold: logo_label.configure(command=gold_score)
         else: logo_label.configure(command=inc_score)
         idx += 1
-        gv.stars.append((logo_label, x, y_increase*idx, rr.choice(speed_range) / 10000, rr.choice(degrees_range)))
+        gv.stars.append((logo_label, x, y_increase*idx, rr.choice(speed_range) / 10000))
     
     def loop_n() -> str:
         for idx, star_comb in enumerate(gv.stars):
@@ -252,7 +250,7 @@ def proj_bg_vert() -> None:
                 gv.stars[idx] = tuple(star_comb)
             except:
                 pass
-        this_loop = gv.window.after(50, loop_n)
+        this_loop = gv.window.after(33, loop_n)
         gv.star_loop[0] = this_loop
         return this_loop
     
@@ -283,7 +281,7 @@ def proj_bg_vert() -> None:
                 gv.stars[idx] = tuple(star_comb)
             except:
                 pass
-        this_loop = gv.window.after(50, loop_s)
+        this_loop = gv.window.after(33, loop_s)
         gv.star_loop[0] = this_loop
         return this_loop
     

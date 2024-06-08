@@ -4,7 +4,6 @@ import globalvariables as gv
 from datetime import date
 import tkinter as tk
 import constants
-import uiutil
 import sounds
 import json
 import proj
@@ -25,8 +24,8 @@ def update_curr_tree() -> None:
 
 def edit_main(main, name_entry:tk.Entry, desc_entry:tk.Entry, time_var:tk.IntVar, mo_var:tk.StringVar, dy_var:tk.StringVar, yr_var:tk.StringVar, notes_entry:tk.Entry):
     if time_var.get() == 1:
-        date_mo = uiutil.determine_month(mo_var.get())
-        date_dy = uiutil.determine_day(dy_var.get())
+        date_mo = proj.determine_month(mo_var.get())
+        date_dy = proj.determine_day(dy_var.get())
         if date_mo == "" or date_dy == "" or yr_var.get() == "":
             messagebox.showerror("Invalid Date", "Please enter a valid date.")
             return
@@ -41,8 +40,11 @@ def edit_main(main, name_entry:tk.Entry, desc_entry:tk.Entry, time_var:tk.IntVar
         main.notes = notes_entry.get()
 
     if mo_var.get() != "" and dy_var.get() != "" and yr_var.get() != "":
-        new_date = uiutil.determine_month(mo_var.get()) + "/" + uiutil.determine_day(dy_var.get()) + "/" + yr_var.get()
+        new_date = proj.determine_month(mo_var.get()) + "/" + proj.determine_day(dy_var.get()) + "/" + yr_var.get()
         if name_entry.get() != "":
+            if main == gv.project:
+                gv.existing_names.remove(gv.project.name)
+                os.remove(rf"{constants.USER_PROJECTS_PATH}" + rf"\{gv.project.name}.json")
             main.name = name_entry.get()
 
         main.time_sensitive = True
@@ -51,6 +53,9 @@ def edit_main(main, name_entry:tk.Entry, desc_entry:tk.Entry, time_var:tk.IntVar
         return True
     elif time_var.get() == 0 or time_var.get() == 2:
         if name_entry.get() != "":
+            if main == gv.project:
+                gv.existing_names.remove(gv.project.name)
+                os.remove(rf"{constants.USER_PROJECTS_PATH}" + rf"\{gv.project.name}.json")
             main.name = name_entry.get()
         
         if time_var.get() == 0:

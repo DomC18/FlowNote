@@ -1,0 +1,146 @@
+{
+    "projectdata": {
+        "Name": "Lean",
+        "Description": "app to help with leetcode problems",
+        "TimeSensitive": "True",
+        "Deadline": "07/01/2024",
+        "Notes": "",
+        "Mains": [
+            {
+                "Name": "ui",
+                "Description": "description",
+                "TimeSensitive": "False",
+                "Deadline": "",
+                "Notes": "notes",
+                "Mains": [
+                    {
+                        "Name": "tkinter",
+                        "Description": "description",
+                        "TimeSensitive": "False",
+                        "Deadline": "",
+                        "Notes": "notes",
+                        "Mains": []
+                    },
+                    {
+                        "Name": "pygame",
+                        "Description": "description",
+                        "TimeSensitive": "False",
+                        "Deadline": "",
+                        "Notes": "notes",
+                        "Mains": []
+                    }
+                ]
+            },
+            {
+                "Name": "functionality",
+                "Description": "description",
+                "TimeSensitive": "False",
+                "Deadline": "",
+                "Notes": "notes",
+                "Mains": [
+                    {
+                        "Name": "drawing board",
+                        "Description": "description",
+                        "TimeSensitive": "False",
+                        "Deadline": "",
+                        "Notes": "notes",
+                        "Mains": []
+                    },
+                    {
+                        "Name": "image viewing",
+                        "Description": "description",
+                        "TimeSensitive": "False",
+                        "Deadline": "",
+                        "Notes": "notes",
+                        "Mains": []
+                    },
+                    {
+                        "Name": "text editor",
+                        "Description": "description",
+                        "TimeSensitive": "False",
+                        "Deadline": "",
+                        "Notes": "notes",
+                        "Mains": [
+                            {
+                                "Name": "snappify",
+                                "Description": "description",
+                                "TimeSensitive": "False",
+                                "Deadline": "",
+                                "Notes": "notes",
+                                "Mains": []
+                            },
+                            {
+                                "Name": "text boxes",
+                                "Description": "description",
+                                "TimeSensitive": "False",
+                                "Deadline": "",
+                                "Notes": "notes",
+                                "Mains": []
+                            }
+                        ]
+                    },
+                    {
+                        "Name": "web connection",
+                        "Description": "description",
+                        "TimeSensitive": "False",
+                        "Deadline": "",
+                        "Notes": "notes",
+                        "Mains": [
+                            {
+                                "Name": "bootstrap",
+                                "Description": "description",
+                                "TimeSensitive": "False",
+                                "Deadline": "",
+                                "Notes": "notes",
+                                "Mains": []
+                            },
+                            {
+                                "Name": "react",
+                                "Description": "description",
+                                "TimeSensitive": "False",
+                                "Deadline": "",
+                                "Notes": "notes",
+                                "Mains": [
+                                    {
+                                        "Name": "learn react",
+                                        "Description": "description",
+                                        "TimeSensitive": "False",
+                                        "Deadline": "",
+                                        "Notes": "notes",
+                                        "Mains": []
+                                    },
+                                    {
+                                        "Name": "learn css",
+                                        "Description": "description",
+                                        "TimeSensitive": "False",
+                                        "Deadline": "",
+                                        "Notes": "notes",
+                                        "Mains": []
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Name": "push code",
+                "Description": "description",
+                "TimeSensitive": "False",
+                "Deadline": "",
+                "Notes": "notes",
+                "Mains": [
+                    {
+                        "Name": "manage github",
+                        "Description": "description",
+                        "TimeSensitive": "False",
+                        "Deadline": "",
+                        "Notes": "notes",
+                        "Mains": []
+                    }
+                ]
+            }
+        ]
+    },
+    "touchedGold": "True"
+}

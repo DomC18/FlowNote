@@ -9,7 +9,6 @@ import random as rr
 import constants
 import projutil
 import sounds
-import uiutil
 import proj
 
 gv.window.title("FlowNote")
@@ -234,8 +233,8 @@ def new_project_submit(name:tk.Entry, description:tk.Entry, time_sensitive:list,
         messagebox.showerror("No Project Date", "Please enter a project date.")
         return
     elif time_sensitive[0] == True:
-        date_mo = uiutil.determine_month(date_month.get())
-        date_dy = uiutil.determine_day(date_day.get())
+        date_mo = proj.determine_month(date_month.get())
+        date_dy = proj.determine_day(date_day.get())
         if not proj.Project.date_after_current(date(int(date_year.get()), int(date_mo), int(date_dy))):
             messagebox.showerror("Invalid Date", "Date entered is before or equal to the date today.")
             return
@@ -255,6 +254,7 @@ def project_setup(main):
         except:
             pass
     gv.np_menu_items.clear()
+    projutil.update_existing_names()
 
     calendar = Calendar(gv.window, gv.window.winfo_width(), gv.window.winfo_height(), "light blue", gv.np_menu_items, lambda m=gv.project : project_setup(m))
     calendar_button = tk.Button(master=gv.window, font=("Helvetica", 20, "bold"), bg="black", fg="white", relief="raised", text="Calendar")
@@ -263,7 +263,7 @@ def project_setup(main):
     tree_button = tk.Button(master=gv.window, font=("Helvetica", 20, "bold"), bg="black", fg="white", relief="raised", text="Tree")
     tree_button.configure(command=projutil.update_curr_tree)
     tree_button.place(anchor="nw", relx=0.25, rely=0.002*16)
-    gv.gold_button = tk.Button(master=gv.window, font=("Helvetica", 8, "bold"), bg="black", fg="white", relief="raised", text="Gold")
+    gv.gold_button = tk.Button(master=gv.window, font=("Helvetica", 8, "bold"), bg="black", fg="white", relief="raised", text="P")
     if gv.touched_gold:
         gv.gold_button.configure(command=exit)
         gv.gold_button.place(anchor="ne", relx=0.95, rely=0.002*16)

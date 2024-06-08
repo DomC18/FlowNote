@@ -34,7 +34,7 @@ class TreeVisualizer:
         positions = {}
         subtree_widths = {}
 
-        def calc_subtree_width(node):
+        def calc_subtree_width(node:TreeNode):
             if not node.children:
                 node_radius = self.get_node_radius(node.value)
                 subtree_widths[node] = node_radius * 2
@@ -47,7 +47,7 @@ class TreeVisualizer:
             subtree_widths[node] = max(width, self.get_node_radius(node.value) * 2)
             return subtree_widths[node]
 
-        def assign_positions(node, x, y) -> None:
+        def assign_positions(node:TreeNode, x:float, y:float) -> None:
             positions[node] = (x, y)
             if node.children:
                 total_width = sum(subtree_widths[child] for child in node.children)

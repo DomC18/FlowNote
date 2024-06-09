@@ -1,4 +1,5 @@
 from PIL import ImageTk, ImageFilter, Image
+from tkinter import messagebox
 import globalvariables as gv
 import tkinter as tk
 import random as rr
@@ -74,11 +75,8 @@ def gold_score():
     inc_score(50)
     if not gv.touched_gold and gv.project != None:
         gv.touched_gold = True
-        gv.gold_button = tk.Button(master=gv.window, font=("Helvetica", 8, "bold"), bg="black", fg="white", relief="raised", text="P")
-        gv.gold_button.configure(command=exit)
-        gv.gold_button.place(anchor="ne", relx=0.95, rely=0.002*16)
-        gv.np_menu_items.append(gv.gold_button)
         projutil.save_project()
+        messagebox.showinfo("Gold Clicked", "You clicked a gold star! Your project is now enchanted!")
 
 def proj_bg_pos_generator() -> list:
     screen_range = range(1, 1001)

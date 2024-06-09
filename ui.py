@@ -263,10 +263,6 @@ def project_setup(main):
     tree_button = tk.Button(master=gv.window, font=("Helvetica", 20, "bold"), bg="black", fg="white", relief="raised", text="Tree")
     tree_button.configure(command=projutil.update_curr_tree)
     tree_button.place(anchor="nw", relx=0.25, rely=0.002*16)
-    gv.gold_button = tk.Button(master=gv.window, font=("Helvetica", 8, "bold"), bg="black", fg="white", relief="raised", text="P")
-    if gv.touched_gold:
-        gv.gold_button.configure(command=exit)
-        gv.gold_button.place(anchor="ne", relx=0.95, rely=0.002*16)
 
     canvas = tk.Canvas(gv.window, width=665, height=315, bd=0, highlightthickness=0, bg="black")
     canvas.place(anchor="n", relx=0.5, rely=0)
@@ -296,7 +292,6 @@ def project_setup(main):
         backward_parent.configure(command=lambda m=main : back_parent(m))
         backward_parent.place(anchor="e", relx=0.644, rely=((0.13125+0.1175)/2))
 
-    gv.np_menu_items.append(gv.gold_button)
     gv.np_menu_items.append(calendar_button)
     gv.np_menu_items.append(tree_button)
     gv.np_menu_items.append(canvas)

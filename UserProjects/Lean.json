@@ -33,21 +33,13 @@
             },
             {
                 "Name": "functionality",
-                "Description": "description",
-                "TimeSensitive": "False",
-                "Deadline": "",
+                "Description": "desc",
+                "TimeSensitive": "True",
+                "Deadline": "07/13/2024",
                 "Notes": "notes",
                 "Mains": [
                     {
                         "Name": "drawing board",
-                        "Description": "description",
-                        "TimeSensitive": "False",
-                        "Deadline": "",
-                        "Notes": "notes",
-                        "Mains": []
-                    },
-                    {
-                        "Name": "image viewing",
                         "Description": "description",
                         "TimeSensitive": "False",
                         "Deadline": "",
@@ -60,34 +52,17 @@
                         "TimeSensitive": "False",
                         "Deadline": "",
                         "Notes": "notes",
-                        "Mains": [
-                            {
-                                "Name": "snappify",
-                                "Description": "description",
-                                "TimeSensitive": "False",
-                                "Deadline": "",
-                                "Notes": "notes",
-                                "Mains": []
-                            },
-                            {
-                                "Name": "text boxes",
-                                "Description": "description",
-                                "TimeSensitive": "False",
-                                "Deadline": "",
-                                "Notes": "notes",
-                                "Mains": []
-                            }
-                        ]
+                        "Mains": []
                     },
                     {
-                        "Name": "web connection",
-                        "Description": "description",
+                        "Name": "ds presets",
+                        "Description": "data structures like maps and trees",
                         "TimeSensitive": "False",
                         "Deadline": "",
                         "Notes": "notes",
                         "Mains": [
                             {
-                                "Name": "bootstrap",
+                                "Name": "arrays",
                                 "Description": "description",
                                 "TimeSensitive": "False",
                                 "Deadline": "",
@@ -95,48 +70,30 @@
                                 "Mains": []
                             },
                             {
-                                "Name": "react",
+                                "Name": "linked list",
                                 "Description": "description",
                                 "TimeSensitive": "False",
                                 "Deadline": "",
                                 "Notes": "notes",
-                                "Mains": [
-                                    {
-                                        "Name": "learn react",
-                                        "Description": "description",
-                                        "TimeSensitive": "False",
-                                        "Deadline": "",
-                                        "Notes": "notes",
-                                        "Mains": []
-                                    },
-                                    {
-                                        "Name": "learn css",
-                                        "Description": "description",
-                                        "TimeSensitive": "False",
-                                        "Deadline": "",
-                                        "Notes": "notes",
-                                        "Mains": []
-                                    }
-                                ]
+                                "Mains": []
+                            },
+                            {
+                                "Name": "trees",
+                                "Description": "description",
+                                "TimeSensitive": "False",
+                                "Deadline": "",
+                                "Notes": "notes",
+                                "Mains": []
+                            },
+                            {
+                                "Name": "graphs",
+                                "Description": "description",
+                                "TimeSensitive": "False",
+                                "Deadline": "",
+                                "Notes": "notes",
+                                "Mains": []
                             }
                         ]
-                    }
-                ]
-            },
-            {
-                "Name": "push code",
-                "Description": "description",
-                "TimeSensitive": "False",
-                "Deadline": "",
-                "Notes": "notes",
-                "Mains": [
-                    {
-                        "Name": "manage github",
-                        "Description": "description",
-                        "TimeSensitive": "False",
-                        "Deadline": "",
-                        "Notes": "notes",
-                        "Mains": []
                     }
                 ]
             }
